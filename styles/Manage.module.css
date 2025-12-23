@@ -210,7 +210,7 @@
 .yuPage select.inputLite,
 .yuPage textarea.inputLite,
 .rowAlt .inputLite {
-  background: rgba(219, 245, 241, 0.85) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
   color: rgba(17, 24, 39, 0.95) !important;
 
   border: 1px solid rgba(120, 160, 190, 0.45) !important;
