@@ -243,9 +243,7 @@ export default function ConfigPage() {
             <Col md={12}>
               <hr />
               <h3 style={{ marginBottom: 8 }}>自定义按钮（CustomButtons）</h3>
-              <div style={{ color: "#666", marginBottom: 10 }}>
-                每行一个按钮：名称 / 链接 / 图标路径（建议放到 public/assets 或 public/uploads）
-              </div>
+
 
               {(form.CustomButtons || []).map((btn, idx) => (
                 <Row key={idx} className="g-2" style={{ marginBottom: 8 }}>
