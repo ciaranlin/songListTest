@@ -1,6 +1,7 @@
 // pages/yu.js
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { Container, Table } from "react-bootstrap";
 
 import styles from "../styles/Home.module.css";
@@ -10,79 +11,111 @@ import SongRow from "../components/manage/SongRow";
 // toast
 import { toast } from "react-toastify";
 
+import { getMergedConfig, getMergedConfigClient } from "../lib/siteConfigStore";
+
 export default function SongManager() {
   const [songs, setSongs] = useState([]);
+  const [siteConfig, setSiteConfig] = useState(getMergedConfig());
+
+  // 加载运行时配置（与首页一致：配置页改完即可生效）
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const merged = await getMergedConfigClient();
+      if (mounted) setSiteConfig(merged);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const backgroundImageUrl = useMemo(() => {
+    return siteConfig?.BackgroundImage || "/assets/images/background.webp";
+  }, [siteConfig]);
 
   // 加载歌单
-  const fetchSongs = async () => {
-    const res = await fetch("/api/getSongs");
-    const data = await res.json();
-    setSongs(data.songs || []);
-  };
+  const fetchSongs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/getSongs");
+      const data = await res.json();
+      setSongs(data.songs || []);
+    } catch {
+      setSongs([]);
+    }
+  }, []);
 
   useEffect(() => {
     fetchSongs();
-  }, []);
+  }, [fetchSongs]);
 
   // 本地更新状态
-  const handleChange = (index, key, value) => {
+  const handleChange = useCallback((index, key, value) => {
     setSongs((prev) =>
-      prev.map((song) =>
-        song.index === index ? { ...song, [key]: value } : song
-      )
+      prev.map((song) => (song.index === index ? { ...song, [key]: value } : song))
     );
-  };
+  }, []);
 
   // 修改
-  const handleUpdate = async (song) => {
-    const res = await fetch("/api/updateSong", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(song),
-    });
-    const data = await res.json();
-    toast.success(data.message || "修改成功！");
-    fetchSongs();
-  };
+  const handleUpdate = useCallback(
+    async (song) => {
+      const res = await fetch("/api/updateSong", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(song),
+      });
+      const data = await res.json();
+      toast.success(data.message || "修改成功！");
+      fetchSongs();
+    },
+    [fetchSongs]
+  );
 
   // 删除
-  const handleDelete = async (index) => {
-    if (!confirm("确定删除？")) return;
+  const handleDelete = useCallback(
+    async (index) => {
+      if (!confirm("确定删除？")) return;
 
-    const res = await fetch("/api/deleteSong", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ index }),
-    });
+      const res = await fetch("/api/deleteSong", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ index }),
+      });
 
-    const data = await res.json();
-    toast.warn(data.message || "删除成功！");
-    fetchSongs();
-  };
+      const data = await res.json();
+      toast.warn(data.message || "删除成功！");
+      fetchSongs();
+    },
+    [fetchSongs]
+  );
 
   // 添加
-  const handleAdd = async (payload) => {
-    const res = await fetch("/api/addSong", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+  const handleAdd = useCallback(
+    async (payload) => {
+      const res = await fetch("/api/addSong", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await res.json();
-    toast.success(data.message || "添加成功！");
-    fetchSongs();
-  };
+      const data = await res.json();
+      toast.success(data.message || "添加成功！");
+      fetchSongs();
+    },
+    [fetchSongs]
+  );
 
   return (
     <div
+      className={styles.outerContainer}
       style={{
         paddingTop: "80px",
         paddingBottom: "40px",
+        backgroundImage: `url(${backgroundImageUrl})`,
       }}
-      className={styles.outerContainer}
     >
       <Head>
         <title>🌟🐟の歌单管理</title>
+        <meta name="robots" content="noindex,nofollow" />
       </Head>
 
       <Container>
@@ -101,7 +134,8 @@ export default function SongManager() {
         </h1>
 
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-          <a
+          {/* 清理 <a href>：统一使用 Next Link（并保留你的 adminEnabled 逻辑） */}
+          <Link
             href="/config"
             onClick={() => {
               // Enable config access (no login, local-only)
@@ -119,7 +153,7 @@ export default function SongManager() {
             }}
           >
             ⚙️ 配置
-          </a>
+          </Link>
         </div>
 
         {/* 白色卡片区域 */}
@@ -155,7 +189,6 @@ export default function SongManager() {
           </Container>
         </div>
       </Container>
-
     </div>
   );
 }
