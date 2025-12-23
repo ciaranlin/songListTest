@@ -215,3 +215,15 @@
 .rowAlt .inputLite {
   background: rgba(255, 255, 255, 0.82);
 }
+
+/* ===== 交替行：改成日间浅蓝（替代深灰） ===== */
+
+.rowAlt {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* 行内输入框保持浅白，不再变灰 */
+.rowAlt .inputLite {
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: rgba(20, 25, 35, 0.95) !important;
+}
