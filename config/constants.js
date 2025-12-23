@@ -42,6 +42,13 @@ export const config = {
 
   FaviconImage: "/favicon.png",
   FaviconImagePrev: "",
+
+  // New: banner/background images
+  BannerImage: "/assets/images/banner_image.webp",
+  BannerImagePrev: "",
+
+  BackgroundImage: "/assets/images/background.webp",
+  BackgroundImagePrev: "",
 };
 
 export default config;

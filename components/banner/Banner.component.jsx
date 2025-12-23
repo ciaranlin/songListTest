@@ -52,7 +52,7 @@ export default function Banner({ songCount, config }) {
         <Image
           loader={imageLoader}
           className={styles.avatar}
-          src="./assets/images/banner_image.webp"
+          src={config?.BannerImage || "/assets/images/banner_image.webp"}
           width={250}
           height={250}
         />

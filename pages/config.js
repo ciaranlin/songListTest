@@ -291,7 +291,85 @@ export default function ConfigPage() {
               <hr />
               <h3 style={{ marginBottom: 12 }}>图片上传（写入 public/uploads，保留上一版）</h3>
 
+
+              {/* BannerImage */}
+              <Row className="g-2" style={{ alignItems: "center" }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0 }}>BannerImage</Form.Label>
+                </Col>
+                <Col md={5}>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "BannerImage")} />
+                </Col>
+                <Col md={4} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {form.BannerImage ? (
+                    <img src={form.BannerImage} alt="BannerImage" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8 }} />
+                  ) : (
+                    <span style={{ color: "#999" }}>未设置</span>
+                  )}
+                  <Button size="sm" variant="outline-danger" onClick={() => clearImage("BannerImage")}>
+                    清除
+                  </Button>
+                  <Button size="sm" variant="outline-secondary" disabled={!form.BannerImagePrev} onClick={() => restorePrevImage("BannerImage")}>
+                    返回上一版
+                  </Button>
+                </Col>
+              </Row>
+
+              {/* BannerImage 路径 */}
+              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BannerImage 路径</Form.Label>
+                </Col>
+                <Col md={9}>
+                  <Form.Control
+                    type="text"
+                    value={form.BannerImage || ""}
+                    placeholder="/uploads/banner_image.webp 或 /assets/images/banner_image.webp"
+                    onChange={(e) => update("BannerImage", e.target.value)}
+                  />
+                </Col>
+              </Row>
+
+              {/* BackgroundImage */}
+              <Row className="g-2" style={{ alignItems: "center" }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0 }}>BackgroundImage</Form.Label>
+                </Col>
+                <Col md={5}>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "BackgroundImage")} />
+                </Col>
+                <Col md={4} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {form.BackgroundImage ? (
+                    <img src={form.BackgroundImage} alt="BackgroundImage" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 8 }} />
+                  ) : (
+                    <span style={{ color: "#999" }}>未设置</span>
+                  )}
+                  <Button size="sm" variant="outline-danger" onClick={() => clearImage("BackgroundImage")}>
+                    清除
+                  </Button>
+                  <Button size="sm" variant="outline-secondary" disabled={!form.BackgroundImagePrev} onClick={() => restorePrevImage("BackgroundImage")}>
+                    返回上一版
+                  </Button>
+                </Col>
+              </Row>
+
+              {/* BackgroundImage 路径 */}
+              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BackgroundImage 路径</Form.Label>
+                </Col>
+                <Col md={9}>
+                  <Form.Control
+                    type="text"
+                    value={form.BackgroundImage || ""}
+                    placeholder="/uploads/background_image.webp 或 /assets/images/background.webp"
+                    onChange={(e) => update("BackgroundImage", e.target.value)}
+                  />
+                </Col>
+              </Row>
+
               {/* Logo */}
+
               <Row className="g-2" style={{ alignItems: "center" }}>
                 <Col md={3}>
                   <Form.Label style={{ marginBottom: 0 }}>LogoImage</Form.Label>

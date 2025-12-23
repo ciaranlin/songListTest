@@ -162,7 +162,7 @@ export default function Home() {
 
 
   return (
-    <div className={styles.outerContainer}>
+    <div className={styles.outerContainer} style={{ backgroundImage: `url(${siteConfig?.BackgroundImage || "/assets/images/background.webp"})` }}>
 
       <Link href={"https://live.bilibili.com/" + siteConfig.BiliLiveRoomID} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#1D0C26" }}>
         <div className={styles.goToLiveDiv}>

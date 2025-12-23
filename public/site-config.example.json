@@ -6,5 +6,7 @@
     "示例文案 1",
     "示例文案 2"
   ],
-  "LogoImage": "/assets/images/self_intro.webp"
+  "LogoImage": "/assets/images/self_intro.webp",
+  "BannerImage": "/assets/images/banner_image.webp",
+  "BackgroundImage": "/assets/images/background.webp"
 }
