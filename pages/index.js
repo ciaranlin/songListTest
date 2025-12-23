@@ -198,7 +198,7 @@ export default function Home() {
           <title>{siteConfig.Name}的歌单</title>
           <meta name="keywords" content="B站,bilibili,歌单" />
           <meta name="description" content={`${siteConfig.Name}的歌单`} />
-          <link rel="icon" type="image/x-icon" href="/favicon.png" />
+          <link rel="icon" type="image/x-icon" href={siteConfig.FaviconImage || "/favicon.png"} />
         </Head>
 
         <section className={styles.main}>
