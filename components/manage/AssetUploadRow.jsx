@@ -91,7 +91,6 @@ export default function AssetUploadRow({
               border: "1px solid rgba(255,255,255,0.12)",
             }}
           />
-          <div style={{ fontSize: 12, opacity: 0.8, wordBreak: "break-all" }}>{value}</div>
         </div>
       ) : null}
     </div>

@@ -125,19 +125,6 @@ export default function Banner({ songCount, config }) {
               />
             ))}
           </div>
-
-          {/* GIF 卡片 */}
-          <div
-            className="extra-card"
-            style={{ textAlign: "center", marginTop: "20px" }}
-          >
-            <img
-              src={gifImg}
-              alt="gif-card"
-              className="gif-image"
-              style={{ width: "180px", borderRadius: "12px" }}
-            />
-          </div>
         </div>
       </div>
     </Col>

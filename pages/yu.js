@@ -2,27 +2,27 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Container, Table } from "react-bootstrap";
-
-import styles from "../styles/Home.module.css";
-import AddSongForm from "../components/manage/AddSongForm";
-import SongRow from "../components/manage/SongRow";
-
-// toast
+import { Container, Table, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 
+import manageStyles from "../styles/Manage.module.css";
+import homeStyles from "../styles/Home.module.css";
+
+import AddSongForm from "../components/manage/AddSongForm";
+import SongRow from "../components/manage/SongRow";
 import { getMergedConfig, getMergedConfigClient } from "../lib/siteConfigStore";
 
 export default function SongManager() {
   const [songs, setSongs] = useState([]);
   const [siteConfig, setSiteConfig] = useState(getMergedConfig());
 
-  // 加载运行时配置（与首页一致：配置页改完即可生效）
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const merged = await getMergedConfigClient();
-      if (mounted) setSiteConfig(merged);
+      try {
+        const merged = await getMergedConfigClient();
+        if (mounted) setSiteConfig(merged);
+      } catch {}
     })();
     return () => {
       mounted = false;
@@ -33,7 +33,6 @@ export default function SongManager() {
     return siteConfig?.BackgroundImage || "/assets/images/background.webp";
   }, [siteConfig]);
 
-  // 加载歌单
   const fetchSongs = useCallback(async () => {
     try {
       const res = await fetch("/api/getSongs");
@@ -48,14 +47,10 @@ export default function SongManager() {
     fetchSongs();
   }, [fetchSongs]);
 
-  // 本地更新状态
   const handleChange = useCallback((index, key, value) => {
-    setSongs((prev) =>
-      prev.map((song) => (song.index === index ? { ...song, [key]: value } : song))
-    );
+    setSongs((prev) => prev.map((song) => (song.index === index ? { ...song, [key]: value } : song)));
   }, []);
 
-  // 修改
   const handleUpdate = useCallback(
     async (song) => {
       const res = await fetch("/api/updateSong", {
@@ -63,32 +58,28 @@ export default function SongManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(song),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       toast.success(data.message || "修改成功！");
       fetchSongs();
     },
     [fetchSongs]
   );
 
-  // 删除
   const handleDelete = useCallback(
     async (index) => {
       if (!confirm("确定删除？")) return;
-
       const res = await fetch("/api/deleteSong", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ index }),
       });
-
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       toast.warn(data.message || "删除成功！");
       fetchSongs();
     },
     [fetchSongs]
   );
 
-  // 添加
   const handleAdd = useCallback(
     async (payload) => {
       const res = await fetch("/api/addSong", {
@@ -96,8 +87,7 @@ export default function SongManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       toast.success(data.message || "添加成功！");
       fetchSongs();
     },
@@ -106,88 +96,80 @@ export default function SongManager() {
 
   return (
     <div
-      className={styles.outerContainer}
+      className={manageStyles.page}
       style={{
-        paddingTop: "80px",
-        paddingBottom: "40px",
+        background: "var(--yu-bg, #111827)",
+        color: "var(--yu-text, rgba(255,255,255,0.92))",
         backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       <Head>
-        <title>🌟🐟の歌单管理</title>
+        <title>歌单管理</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <Container>
-        {/* 大标题（后台专用） */}
-        <h1
-          style={{
-            textAlign: "center",
-            fontSize: "38px",
-            fontWeight: 900,
-            marginBottom: "50px",
-            letterSpacing: "1px",
-            color: "#333",
-          }}
-        >
-          🌟🐟の歌单管理
-        </h1>
+      <Container className={manageStyles.container}>
+        <div className={manageStyles.title}>歌单管理</div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-          {/* 清理 <a href>：统一使用 Next Link（并保留你的 adminEnabled 逻辑） */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
           <Link
             href="/config"
             onClick={() => {
-              // Enable config access (no login, local-only)
               try {
                 window.localStorage.setItem("adminEnabled", "true");
               } catch {}
             }}
-            style={{
-              padding: "8px 12px",
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              textDecoration: "none",
-              color: "#333",
-              fontWeight: 700,
-            }}
+            style={{ textDecoration: "none" }}
           >
-            ⚙️ 配置
+            <Button variant="outline-light" size="sm">⚙️ 配置</Button>
+          </Link>
+
+          <Link href="/" style={{ textDecoration: "none" }}>
+            <Button variant="outline-light" size="sm">🏠 返回首页</Button>
           </Link>
         </div>
 
-        {/* 白色卡片区域 */}
-        <div className={styles.songListMarco}>
-          <AddSongForm onAdd={handleAdd} />
+        <section className={manageStyles.section}>
+          <div className={manageStyles.sectionHeader}>
+            <div>
+              <div className={manageStyles.sectionTitle}>歌曲编辑</div>
+              <div className={manageStyles.sectionHint}>增删改歌单数据（与首页实时同步）</div>
+            </div>
+          </div>
 
-          <Container fluid>
-            <Table responsive className={styles.tableWrapper}>
-              <thead>
-                <tr>
-                  <th style={{ width: "60px" }}>Index</th>
-                  <th>歌名</th>
-                  <th>歌手</th>
-                  <th>语言</th>
-                  <th>BVID</th>
-                  <th style={{ textAlign: "center" }}>舰长点歌</th>
-                  <th style={{ width: "140px" }}>操作</th>
-                </tr>
-              </thead>
+          <div className={homeStyles.songListMarco} style={{ marginTop: 10 }}>
+            <AddSongForm onAdd={handleAdd} />
+            <Container fluid>
+              <Table responsive className={homeStyles.tableWrapper}>
+                <thead>
+                  <tr>
+                    <th style={{ width: "60px" }}>Index</th>
+                    <th>歌名</th>
+                    <th>歌手</th>
+                    <th>语言</th>
+                    <th>BVID</th>
+                    <th style={{ textAlign: "center" }}>舰长点歌</th>
+                    <th style={{ width: "140px" }}>操作</th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {songs.map((song) => (
-                  <SongRow
-                    key={song.index}
-                    song={song}
-                    onChange={handleChange}
-                    onUpdate={handleUpdate}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </tbody>
-            </Table>
-          </Container>
-        </div>
+                <tbody>
+                  {songs.map((song) => (
+                    <SongRow
+                      key={song.index}
+                      song={song}
+                      onChange={handleChange}
+                      onUpdate={handleUpdate}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </tbody>
+              </Table>
+            </Container>
+          </div>
+        </section>
       </Container>
     </div>
   );

@@ -1,13 +1,8 @@
 function imageLoader({ src }) {
-  if (!src) return src;
-
-  // 完整 URL 直接返回
+  // src 可能是 "/assets/xx"、"assets/xx"、"/uploads/xx" 或完整 URL
+  if (!src) return "";
   if (src.startsWith("http://") || src.startsWith("https://")) return src;
-  if (src.startsWith("//")) return src;
-
-  // 已经是绝对路径就别再加 /
-  if (src.startsWith("/")) return src;
-
+  if (src.startsWith("/")) return src; // 避免变成 //assets/... 导致请求到 http(s)://assets/
   return `/${src}`;
 }
 

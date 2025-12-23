@@ -9,7 +9,7 @@ export const config = {
   QQMusicId: "",
   Footer: "Copyright © 2025 星鱼和她的宝宝大人",
 
-
+  $1
   // 主题配色（可在 /config 调整，写入 public/site-config.json）
   Theme: {
     mainBg: "#0f172a",      // 主站背景

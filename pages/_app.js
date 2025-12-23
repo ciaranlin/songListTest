@@ -1,4 +1,3 @@
-import '../styles/yu.css';
 import '../styles/globals.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
@@ -36,6 +35,18 @@ function MyApp ({ Component, pageProps }) {
 
   useEffect(() => {
     let mounted = true;
+    const pickTextColors = (hex) => {
+      const h = String(hex || "").replace("#", "").trim();
+      if (h.length !== 6) return { text: "rgba(255,255,255,0.92)", muted: "rgba(255,255,255,0.72)" };
+      const r = parseInt(h.slice(0, 2), 16) / 255;
+      const g = parseInt(h.slice(2, 4), 16) / 255;
+      const b = parseInt(h.slice(4, 6), 16) / 255;
+      const lin = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+      if (L < 0.45) return { text: "rgba(255,255,255,0.92)", muted: "rgba(255,255,255,0.72)" };
+      return { text: "rgba(17,24,39,0.92)", muted: "rgba(17,24,39,0.70)" };
+    };
+
     (async () => {
       try {
         const merged = await getMergedConfigClient();
@@ -49,6 +60,19 @@ function MyApp ({ Component, pageProps }) {
         if (theme.yuBg) root.style.setProperty("--yu-bg", theme.yuBg);
         if (theme.configBg) root.style.setProperty("--config-bg", theme.configBg);
         if (theme.accent) root.style.setProperty("--accent", theme.accent);
+
+        const mainC = pickTextColors(theme.mainBg);
+        root.style.setProperty("--main-text", mainC.text);
+        root.style.setProperty("--main-text-muted", mainC.muted);
+
+        const yuC = pickTextColors(theme.yuBg || theme.mainBg);
+        root.style.setProperty("--yu-text", yuC.text);
+        root.style.setProperty("--yu-text-muted", yuC.muted);
+
+        const cfgC = pickTextColors(theme.configBg || theme.mainBg);
+        root.style.setProperty("--config-text", cfgC.text);
+        root.style.setProperty("--config-text-muted", cfgC.muted);
+
       } catch (e) {
         // ignore
       }

@@ -32,9 +32,11 @@ export default function CornerActions({ config }) {
             ? styles.cornerBottomRight
             : styles.cornerTopRight;
 
+        const iconSrc = a.iconUrl || a.icon || "";
+
         const content = (
           <span className={styles.cornerBtnInner}>
-            {a.icon ? <img src={a.icon} alt="" className={styles.cornerBtnIcon} /> : null}
+            {iconSrc ? <img src={iconSrc} alt="" className={styles.cornerBtnIcon} /> : null}
             <span>{a.text}</span>
           </span>
         );
@@ -56,7 +58,7 @@ export default function CornerActions({ config }) {
         return (
           <a
             key={a.id || a.text}
-            href={a.href || "#"}
+            href={a.href || a.link || "#"}
             target="_blank"
             rel="noreferrer"
             className={`${styles.cornerBtn} ${posClass}`}
