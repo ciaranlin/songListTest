@@ -43,11 +43,11 @@ export const config = {
   FaviconImage: "/favicon.png",
   FaviconImagePrev: "",
 
-  // New: banner/background images
   BannerImage: "/assets/images/banner_image.webp",
   BannerImagePrev: "",
 
-  BackgroundImage: "/assets/images/background.webp",
+  // ✅ 背景图默认路径：与首页 fallback 一致（建议保持同一个文件名/路径体系）
+  BackgroundImage: "/assets/images/background_image.webp",
   BackgroundImagePrev: "",
 };
 

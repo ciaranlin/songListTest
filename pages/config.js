@@ -53,7 +53,7 @@ export default function ConfigPage() {
     try {
       setSaving(true);
       await saveConfigToServer(form);
-      toast.success("已保存到服务器：public/site-config.json（立即生效，刷新页面即可看到）。");
+      toast.success("立即生效，刷新页面即可看到");
     } catch (e) {
       toast.error(String(e?.message || "保存失败"));
     } finally {
@@ -134,48 +134,20 @@ export default function ConfigPage() {
     }
   };
 
-  // Server-side rollback: swap current <-> prev on disk, then update form paths
-  const restorePrevImage = async (key) => {
-    try {
-      setSaving(true);
-      const res = await fetch(`/api/assets/rollback?key=${encodeURIComponent(key)}`, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || "回退失败");
-
-      setForm((prev) => ({
-        ...prev,
-        [key]: data.path || "",
-        [`${key}Prev`]: data.prevPath || "",
-      }));
-
-      toast.success("已回退到上一版图片（服务器已切换）。记得点击「保存」。");
-    } catch (err) {
-      toast.error(String(err?.message || "回退失败"));
-    } finally {
-      setSaving(false);
-    }
+  const restorePrevImage = (key) => {
+    const prevKey = `${key}Prev`;
+    setForm((prev) => {
+      const cur = prev[key] || "";
+      const old = prev[prevKey] || "";
+      if (!old) return prev;
+      return { ...prev, [key]: old, [prevKey]: cur };
+    });
+    toast.success("已切回上一版图片，记得点击「保存」。");
   };
 
-  // Server-side clear: delete current file on disk, keep prev by default
-  const clearImage = async (key) => {
-    try {
-      setSaving(true);
-      const res = await fetch(`/api/assets/clear?key=${encodeURIComponent(key)}`, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || "清除失败");
-
-      setForm((prev) => ({
-        ...prev,
-        [key]: "",
-        [`${key}Prev`]: data.prevPath || prev[`${key}Prev`] || "",
-      }));
-
-      toast.success("已清除当前图片（服务器已删除当前文件）。记得点击「保存」。");
-    } catch (err) {
-      toast.error(String(err?.message || "清除失败"));
-    } finally {
-      setSaving(false);
-    }
+  const clearImage = (key) => {
+    setForm((prev) => ({ ...prev, [key]: "" }));
+    toast.success("已清除当前图片，记得点击「保存」。");
   };
 
   return (
@@ -186,10 +158,6 @@ export default function ConfigPage() {
 
       <Container>
         <h1 className={styles.title}>⚙️ 配置页</h1>
-        <div style={{ color: "#666", marginBottom: 16 }}>
-          这里的修改会写入服务器文件 <code>public/site-config.json</code>，全站读取时会<strong>优先使用它</strong>；
-          如果没有该文件，会自动回退到 <code>config/constants.js</code> 默认配置。
-        </div>
 
         <Form>
           <Row className="g-3">
@@ -343,7 +311,20 @@ export default function ConfigPage() {
                 </Col>
               </Row>
 
-              <div style={{ height: 10 }} />
+              {/* BannerImage 路径 */}
+              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BannerImage 路径</Form.Label>
+                </Col>
+                <Col md={9}>
+                  <Form.Control
+                    type="text"
+                    value={form.BannerImage || ""}
+                    placeholder="/uploads/banner_image.webp 或 /assets/images/banner_image.webp"
+                    onChange={(e) => update("BannerImage", e.target.value)}
+                  />
+                </Col>
+              </Row>
 
               {/* BackgroundImage */}
               <Row className="g-2" style={{ alignItems: "center" }}>
@@ -368,7 +349,20 @@ export default function ConfigPage() {
                 </Col>
               </Row>
 
-              <div style={{ height: 10 }} />
+              {/* BackgroundImage 路径 */}
+              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BackgroundImage 路径</Form.Label>
+                </Col>
+                <Col md={9}>
+                  <Form.Control
+                    type="text"
+                    value={form.BackgroundImage || ""}
+                    placeholder="/uploads/background_image.webp 或 /assets/images/background.webp"
+                    onChange={(e) => update("BackgroundImage", e.target.value)}
+                  />
+                </Col>
+              </Row>
 
               {/* Logo */}
 
@@ -436,10 +430,7 @@ export default function ConfigPage() {
                 <Button variant="outline-secondary" onClick={() => router.push("/")}>返回首页</Button>
               </div>
 
-              <div style={{ marginTop: 10, color: "#888", fontSize: 12 }}>
-                提示：图片会上传到 <code>public/uploads</code>，配置页保存会写入 <code>public/site-config.json</code>。
-                在开发模式下刷新即可生效；生产环境同样会立即生效（无缓存时）。若你用了 CDN/反代缓存，需要为 <code>/site-config.json</code> 关闭缓存或加缓存刷新策略。
-              </div>
+              
             </Col>
           </Row>
         </Form>
