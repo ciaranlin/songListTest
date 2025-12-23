@@ -1,11 +1,12 @@
-import { config } from "../config/constants";
+// utils/utils.js
+// Make sure this file uses ESM exports (Next.js expects static exports on the client bundle)
 
-const include = (obj1, obj2) => {
-    return obj1?.toString().toLowerCase().includes(obj2.toLowerCase())
-}
+export const include = (arr, value) => {
+  if (!Array.isArray(arr)) return false;
+  return arr.includes(value);
+};
 
-const getCursor = () => {
-    return config.Cursor ? 'url("./assets/cursor/pointer.png"), pointer' : ''
-}
-
-module.exports = { include, getCursor };
+export const getCursor = () => {
+  // keep it simple and safe for all browsers
+  return "pointer";
+};
