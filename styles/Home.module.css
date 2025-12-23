@@ -109,7 +109,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* GIF 图片 */
+/* GIF 图片（基础） */
 .bannerGif {
   width: 100%;
   height: auto;
@@ -128,14 +128,11 @@
   }
 }
 
-
 @media (max-width: 1200px) {
   .bannerRight {
     display: none;
   }
 }
-
-
 
 /* 只隐藏“自我介绍”这个按钮（type=intro）——桌面端 */
 @media (min-width: 1201px) {
@@ -143,7 +140,6 @@
     display: none !important;
   }
 }
-
 
 /* =========================
    歌单 / 表格区域
@@ -232,26 +228,22 @@
 }
 
 /* =========================
-   CornerActions（角落快捷按钮）最终版
+   CornerActions（角落快捷按钮）
    ========================= */
 
-/* 单个角落按钮（外壳） */
 .cornerBtn {
   position: absolute;
   z-index: 10;
 
-  /* 垂直布局：图标在上，文字在下 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
-  /* 尺寸与手感（接近旧版） */
   min-width: 68px;
   padding: 10px 12px;
 
-  /* 视觉样式 */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(0, 0, 0, 0.18);
@@ -272,63 +264,25 @@
   transform: translateY(-1px);
 }
 
-/* =========================
-   内部结构：图标 + 文案
-   ========================= */
-
 .cornerBtnInner {
   display: flex;
-  flex-direction: column;   /* 图标在上 */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
 }
 
-/* 图标（重点：比之前大很多，接近旧版） */
 .cornerBtnIcon {
-  width: 36px;              /* ⭐ 可调：36 / 40 都可以 */
+  width: 36px;
   height: 36px;
   object-fit: cover;
   border-radius: 8px;
 }
 
-/* =========================
-   四角定位
-   ========================= */
-
-.cornerTopLeft {
-  top: 12px;
-  left: 12px;
-}
-
-.cornerTopRight {
-  top: 12px;
-  right: 12px;
-}
-
-.cornerBottomLeft {
-  bottom: 12px;
-  left: 12px;
-}
-
-.cornerBottomRight {
-  bottom: 12px;
-  right: 12px;
-}
-
-/* =========================
-   桌面端：隐藏“自我介绍”(type=intro)
-   ========================= */
-
-@media (min-width: 1201px) {
-  .introBtn {
-    display: none !important;
-  }
-}
-
-/* =========================
-   移动端：可选缩小按钮
-   ========================= */
+.cornerTopLeft { top: 12px; left: 12px; }
+.cornerTopRight { top: 12px; right: 12px; }
+.cornerBottomLeft { bottom: 12px; left: 12px; }
+.cornerBottomRight { bottom: 12px; right: 12px; }
 
 @media (max-width: 768px) {
   .cornerBtn {
@@ -382,4 +336,62 @@
 
 .manageTable td {
   padding: 10px;
+}
+
+/* ===================================================================
+   ✅ 定点修复覆盖区（只改你提到的三件事，不动其它样式）
+   =================================================================== */
+
+/* 1) 角落按钮：强制贴浏览器窗口边（是否贴边取决于 cornerTopRight/Left class 是否命中） */
+.cornerBtn {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+.cornerTopLeft { top: 12px !important; left: 12px !important; right: auto !important; bottom: auto !important; }
+.cornerTopRight { top: 12px !important; right: 12px !important; left: auto !important; bottom: auto !important; }
+.cornerBottomLeft { bottom: 12px !important; left: 12px !important; right: auto !important; top: auto !important; }
+.cornerBottomRight { bottom: 12px !important; right: 12px !important; left: auto !important; top: auto !important; }
+
+/* 2) BannerButton 专用：更小的图标（必须配合 BannerButton 改成用 bannerBtnIcon） */
+.bannerBtnIcon {
+  width: 14px !important;
+  height: 14px !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  vertical-align: text-bottom !important;
+}
+
+/* 文本 / 箭头（配合 BannerButton 使用） */
+.bannerBtnText {
+  display: inline-block;
+  margin: 0;
+}
+
+.bannerBtnChevron {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  transform: scale(0.9);
+  opacity: 0.85;
+}
+
+/* 3) GIF：限制尺寸 + 同时限制 GIF 卡片壳子宽度（只影响 gifBox，不影响 introBox） */
+.gifBoxInnerDiv {
+  max-width: 320px !important; /* ⭐ 卡片不再“很宽” */
+  margin: 0 auto !important;
+}
+
+.bannerGif {
+  width: 100% !important;
+  max-width: 260px !important;
+  max-height: 180px !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+}
+
+/* BannerMobile 内容区：避免被角落按钮遮挡 */
+.bannerMobileWrap {
+  padding-top: 72px;
 }

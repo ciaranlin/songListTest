@@ -56,11 +56,17 @@ export default function Banner({ songCount, config }) {
   };
 
   const bannerImg = config?.BannerImage || "/assets/images/banner_image.webp";
-  const gifImg = config?.GifImage || "/assets/images/my.gif";
+
+  // ✅ 关键：不要默认回落到 /assets/images/my.gif
+  // 否则你不填配置也会一直显示一个“超大默认 GIF”，你改 CSS 会觉得“没变化”
+  const gifImg =
+    typeof config?.GifImage === "string" && config.GifImage.trim()
+      ? config.GifImage.trim()
+      : "";
 
   return (
     <Col className={styles.titleCol}>
-      {/* 角落按钮：必须放在 titleBox 外面，否则会跟着 titleBox 一起移动 */}
+      {/* ✅ 角落按钮：放在 titleBox 外面，避免跟着 titleBox hover 位移 */}
       <CornerActions config={config} />
 
       {/* 顶部头像标题区（hover 会左移的只有这一块） */}
@@ -101,8 +107,8 @@ export default function Banner({ songCount, config }) {
               </div>
             </div>
 
-            {(config?.BannerContent || []).map((cnt) => (
-              <p className={styles.introParagraph} key={cnt}>
+            {(config?.BannerContent || []).map((cnt, idx) => (
+              <p className={styles.introParagraph} key={`${cnt}-${idx}`}>
                 {cnt}
               </p>
             ))}
@@ -110,7 +116,7 @@ export default function Banner({ songCount, config }) {
             <div className="d-flex flex-nowrap justify-content-evenly">
               {(config?.CustomButtons || []).map((btn) => (
                 <BannerButton
-                  key={btn.link}
+                  key={btn.link || btn.name}
                   link={btn.link}
                   image={btn.image}
                   name={btn.name}
@@ -121,7 +127,7 @@ export default function Banner({ songCount, config }) {
           </div>
         </div>
 
-        {/* 卡片2：GIF（独立一张） */}
+        {/* 卡片2：GIF（只有配置了 GifImage 才显示） */}
         {gifImg ? (
           <div className={styles.gifBox}>
             <div className={styles.gifBoxInnerDiv}>
@@ -130,6 +136,7 @@ export default function Banner({ songCount, config }) {
                 alt="装饰GIF"
                 className={styles.bannerGif}
                 loading="lazy"
+                draggable={false}
               />
             </div>
           </div>
