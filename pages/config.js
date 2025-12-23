@@ -134,20 +134,48 @@ export default function ConfigPage() {
     }
   };
 
-  const restorePrevImage = (key) => {
-    const prevKey = `${key}Prev`;
-    setForm((prev) => {
-      const cur = prev[key] || "";
-      const old = prev[prevKey] || "";
-      if (!old) return prev;
-      return { ...prev, [key]: old, [prevKey]: cur };
-    });
-    toast.success("已切回上一版图片，记得点击「保存」。");
+  // Server-side rollback: swap current <-> prev on disk, then update form paths
+  const restorePrevImage = async (key) => {
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/assets/rollback?key=${encodeURIComponent(key)}`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message || "回退失败");
+
+      setForm((prev) => ({
+        ...prev,
+        [key]: data.path || "",
+        [`${key}Prev`]: data.prevPath || "",
+      }));
+
+      toast.success("已回退到上一版图片（服务器已切换）。记得点击「保存」。");
+    } catch (err) {
+      toast.error(String(err?.message || "回退失败"));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const clearImage = (key) => {
-    setForm((prev) => ({ ...prev, [key]: "" }));
-    toast.success("已清除当前图片，记得点击「保存」。");
+  // Server-side clear: delete current file on disk, keep prev by default
+  const clearImage = async (key) => {
+    try {
+      setSaving(true);
+      const res = await fetch(`/api/assets/clear?key=${encodeURIComponent(key)}`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.message || "清除失败");
+
+      setForm((prev) => ({
+        ...prev,
+        [key]: "",
+        [`${key}Prev`]: data.prevPath || prev[`${key}Prev`] || "",
+      }));
+
+      toast.success("已清除当前图片（服务器已删除当前文件）。记得点击「保存」。");
+    } catch (err) {
+      toast.error(String(err?.message || "清除失败"));
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -315,20 +343,7 @@ export default function ConfigPage() {
                 </Col>
               </Row>
 
-              {/* BannerImage 路径 */}
-              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
-                <Col md={3}>
-                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BannerImage 路径</Form.Label>
-                </Col>
-                <Col md={9}>
-                  <Form.Control
-                    type="text"
-                    value={form.BannerImage || ""}
-                    placeholder="/uploads/banner_image.webp 或 /assets/images/banner_image.webp"
-                    onChange={(e) => update("BannerImage", e.target.value)}
-                  />
-                </Col>
-              </Row>
+              <div style={{ height: 10 }} />
 
               {/* BackgroundImage */}
               <Row className="g-2" style={{ alignItems: "center" }}>
@@ -353,20 +368,7 @@ export default function ConfigPage() {
                 </Col>
               </Row>
 
-              {/* BackgroundImage 路径 */}
-              <Row className="g-2" style={{ alignItems: "center", marginTop: 6, marginBottom: 10 }}>
-                <Col md={3}>
-                  <Form.Label style={{ marginBottom: 0, color: "#666" }}>BackgroundImage 路径</Form.Label>
-                </Col>
-                <Col md={9}>
-                  <Form.Control
-                    type="text"
-                    value={form.BackgroundImage || ""}
-                    placeholder="/uploads/background_image.webp 或 /assets/images/background.webp"
-                    onChange={(e) => update("BackgroundImage", e.target.value)}
-                  />
-                </Col>
-              </Row>
+              <div style={{ height: 10 }} />
 
               {/* Logo */}
 

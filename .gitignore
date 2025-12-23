@@ -45,3 +45,7 @@ scf_bootstrap
 
 scripts/*.xlsx
 !scripts/example.xlsx
+
+# runtime uploads & server-side config (do not commit)
+public/uploads/
+public/site-config.json
