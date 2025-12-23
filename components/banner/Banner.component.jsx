@@ -72,15 +72,6 @@ export default function Banner({ songCount, config }) {
           height={250}
           priority
         />
-
-        {gifImg ? (
-          <img
-            src={gifImg}
-            alt="装饰GIF"
-            className={styles.bannerGif}
-          />
-        ) : null}
-
         <h1 className={"display-6 text-center pt-3 " + styles.grandTitle}>
           {config?.Name}
         </h1>
@@ -96,6 +87,17 @@ export default function Banner({ songCount, config }) {
       {/* Banner 内部卡片 */}
       <div className={styles.introBox}>
         <div className={styles.introBoxInnerDiv}>
+
+          {gifImg ? (
+            <div className={styles.gifRow}>
+              <img
+                src={gifImg}
+                alt="装饰GIF"
+                className={styles.bannerGif}
+                loading="lazy"
+              />
+            </div>
+         ) : null}
           <div className={styles.introTitle}>
             <h5>{config?.BannerTitle}</h5>
 
