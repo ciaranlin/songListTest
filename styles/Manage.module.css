@@ -1,9 +1,81 @@
-.wrapper {
-  margin-top: 30px;
+.page {
+  min-height: 100vh;
+  background: var(--config-bg, #0b1220);
+  color: rgba(255,255,255,0.92);
+  padding: 16px 0 48px;
+}
+
+.container {
+  max-width: 980px;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 800;
+  margin: 8px 0 14px;
+}
+
+.section {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 14px 14px;
+  margin-bottom: 14px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.sectionHint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.15);
+  font-size: 13px;
+}
+
+.chipBtn {
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
 }

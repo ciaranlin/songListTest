@@ -3,6 +3,7 @@ import React from "react";
 import styles from "../../styles/Home.module.css";
 
 import BannerButton from "./BannerButton.component";
+import CornerActions from "./CornerActions.component";
 
 export default function BannerMobile({ config }) {
   const bannerContent = Array.isArray(config?.BannerContent)
@@ -14,6 +15,8 @@ export default function BannerMobile({ config }) {
     : [];
 
   return (
+    <div style={{ position: 'relative' }}>
+      <CornerActions config={config} />
     <div>
       {bannerContent.map((cnt, index) => (
         <p className={styles.introParagraph} key={`banner-content-${index}`}>
@@ -33,6 +36,7 @@ export default function BannerMobile({ config }) {
           }}
         />
       ))}
+    </div>
     </div>
   );
 }

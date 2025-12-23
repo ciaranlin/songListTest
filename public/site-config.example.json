@@ -8,5 +8,34 @@
   ],
   "LogoImage": "/assets/images/self_intro.webp",
   "BannerImage": "/assets/images/banner_image.webp",
-  "BackgroundImage": "/assets/images/background.webp"
+  "BackgroundImage": "/assets/images/background.webp",
+  "Theme": {
+    "mainBg": "#0f172a",
+    "yuBg": "#111827",
+    "configBg": "#0b1220",
+    "accent": "#22c55e"
+  },
+  "CornerActions": [
+    {
+      "id": "live",
+      "type": "link",
+      "text": "去直播间",
+      "href": "https://live.bilibili.com/1916955256",
+      "position": "top-right",
+      "icon": ""
+    },
+    {
+      "id": "intro",
+      "type": "intro",
+      "text": "自我介绍",
+      "href": "",
+      "position": "top-left",
+      "icon": ""
+    }
+  ],
+  "LanguageCategories": [
+    "国语",
+    "日语",
+    "英语"
+  ]
 }

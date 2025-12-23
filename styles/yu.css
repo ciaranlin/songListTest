@@ -1,6 +1,6 @@
 .admin-bg {
   min-height: 100vh;
-  background: linear-gradient(135deg, #b8c8d3 0%, #dfe7ec 100%);
+  background: var(--yu-bg, #111827);
   padding: 40px 10px;
   display: flex;
   justify-content: center;
@@ -135,4 +135,11 @@
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+  .admin-bg { padding: 16px 8px; }
+  .admin-container { padding: 16px; border-radius: 14px; }
+  .admin-title { font-size: 22px; }
 }

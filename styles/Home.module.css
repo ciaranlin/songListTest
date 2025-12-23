@@ -236,6 +236,7 @@
   }
 
   .titleCol:hover .titleBox {
+    position: relative;
     transform: translateX(-30%);
   }
 
@@ -704,4 +705,60 @@ input:checked + .slider:before {
 .manageContainer {
   margin: 80px auto;
   padding-top: 50px;
+}
+
+
+/* ===== 角落快捷按钮 ===== */
+.cornerBtn {
+  position: absolute;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
+  color: rgba(255,255,255,0.92);
+  text-decoration: none;
+  font-size: 13px;
+  backdrop-filter: blur(10px);
+}
+
+.cornerBtn:hover {
+  background: rgba(0,0,0,0.28);
+  color: rgba(255,255,255,1);
+}
+
+.cornerBtnInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cornerBtnIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.cornerTopLeft { top: 12px; left: 12px; }
+.cornerTopRight { top: 12px; right: 12px; }
+.cornerBottomLeft { bottom: 12px; left: 12px; }
+.cornerBottomRight { bottom: 12px; right: 12px; }
+
+/* GIF：隐藏在头图下方 */
+.bannerGif {
+  margin-top: 10px;
+  width: 160px;
+  max-width: 60vw;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* 主题：背景覆盖 */
+.mainBg {
+  background: var(--main-bg, #0f172a);
+  min-height: 100vh;
 }

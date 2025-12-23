@@ -8,6 +8,7 @@ import imageLoader from "../../utils/ImageLoader";
 import { getCursor } from "../../utils/utils";
 
 import BannerButton from "./BannerButton.component";
+import CornerActions from "./CornerActions.component";
 
 export default function Banner({ songCount, config }) {
   const netEaseMusicComponent = (id) => {
@@ -61,15 +62,24 @@ export default function Banner({ songCount, config }) {
     <Col className={styles.titleCol}>
       {/* 顶部头像标题区 */}
       <div className={"pt-3 " + styles.titleBox}>
+        <CornerActions config={config} />
         <Image
           loader={imageLoader}
           className={styles.avatar}
           src={bannerImg}
-          alt="banner"
+          alt="头图"
           width={250}
           height={250}
           priority
         />
+
+        {gifImg ? (
+          <img
+            src={gifImg}
+            alt="装饰GIF"
+            className={styles.bannerGif}
+          />
+        ) : null}
 
         <h1 className={"display-6 text-center pt-3 " + styles.grandTitle}>
           {config?.Name}
