@@ -61,10 +61,17 @@
    右侧卡片容器（碎碎念 + GIF）
    ========================= */
 
+/* =========================
+   FIX：右侧卡片整体居中（恢复旧版视觉）
+   ========================= */
+
 .bannerRight {
   position: absolute;
-  right: 4%;
   top: 10%;
+
+  left: 50%;                 /* ⭐ 关键 */
+  transform: translateX(10%);/* ⭐ 微调到头像右侧 */
+
   width: min(620px, 54%);
   display: flex;
   flex-direction: column;
@@ -74,6 +81,7 @@
   pointer-events: none;
   transition: opacity 1s;
 }
+
 
 .titleCol:hover .bannerRight {
   opacity: 1;
