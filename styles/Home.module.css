@@ -455,3 +455,61 @@
     0 0 0 2px rgba(59, 130, 246, 0.15),
     inset 0 1px 2px rgba(0,0,0,0.05);
 }
+
+/* BannerButton 专用：稳定布局（箭头不漂） */
+.bannerBtn {
+  padding: 10px 14px !important;
+  border-radius: 999px !important;
+
+  /* 你原来的按钮风格如果要保留，可以把背景/边框挪过来 */
+  background: rgba(255,255,255,0.70) !important;
+  border: 1px solid rgba(180,160,190,0.60) !important;
+
+  /* 关键：别让 bootstrap 的 line-height 影响子元素 */
+  line-height: 1 !important;
+}
+
+.bannerBtnInner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* 图标稍微大一点点（你提的需求） */
+.bannerBtnIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+/* 文本别被挤压换行 */
+.bannerBtnText {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* 箭头永远垂直居中，且不要被字体影响 */
+.bannerBtnChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transform: translateY(0.5px); /* 细微视觉居中 */
+}
+
+@media (min-width: 1201px) {
+  .introBtn {
+    display: none !important;
+  }
+}
+@media (max-width: 1200px) {
+  .desktopOnly {
+    display: none !important;
+  }
+  .introBtn {
+    display: inline-flex !important;
+  }
+}

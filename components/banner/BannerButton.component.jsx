@@ -10,26 +10,26 @@ export default function BannerButton({ link, image, name, style }) {
 
   return (
     <Link href={link || "#"} target="_blank" rel="noopener noreferrer">
-      <Button className={styles.customRandomButton} style={style}>
-        {/* ✅ 没图标就不渲染，避免出现占位小方块 */}
-        {hasIcon ? (
-          <img
-            className={styles.bannerBtnIcon}
-            src={image}
-            alt=""
-            loading="lazy"
-            draggable={false}
-            onError={(e) => {
-              // ✅ 图片加载失败也隐藏，避免破图/占位
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        ) : null}
+      <Button className={styles.bannerBtn} style={style}>
+        <span className={styles.bannerBtnInner}>
+          {hasIcon ? (
+            <img
+              className={styles.bannerBtnIcon}
+              src={image}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : null}
 
-        <span className={styles.bannerBtnText}>{name}</span>
+          <span className={styles.bannerBtnText}>{name}</span>
 
-        <span className={styles.bannerBtnChevron}>
-          <ChevronSVG />
+          <span className={styles.bannerBtnChevron} aria-hidden="true">
+            <ChevronSVG />
+          </span>
         </span>
       </Button>
     </Link>
