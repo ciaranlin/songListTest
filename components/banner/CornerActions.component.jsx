@@ -3,14 +3,22 @@ import { Modal, Button } from "react-bootstrap";
 import styles from "../../styles/Home.module.css";
 
 /**
- * 角落快捷按钮：
- * - type=link: 外链
- * - type=intro: 弹出自我介绍（使用 config.BannerTitle + BannerContent）
+ * CornerActions - 角落快捷按钮
+ *
+ * 支持字段（兼容旧字段）：
+ * - id: string
+ * - text: string（必填）
+ * - type: "link" | "intro"（默认 link）
+ * - href / link: 外链地址（type=link 时使用）
+ * - position: "top-left" | "top-right" | "bottom-left" | "bottom-right"（默认 top-right）
+ * - iconUrl / icon: 图标地址（可选）
+ * - showOnMobile: boolean（默认 true）
+ * - showOnDesktop: boolean（默认 true）
  *
  * config.CornerActions 示例：
  * [
- *   { "id":"intro", "text":"自我介绍", "type":"intro", "position":"top-left" },
- *   { "id":"live", "text":"去直播间", "type":"link", "href":"https://xxx", "position":"top-right" }
+ *   { "id":"intro", "text":"自我介绍", "type":"intro", "position":"top-left", "showOnDesktop": false },
+ *   { "id":"live", "text":"去直播间", "type":"link", "href":"https://xxx", "position":"top-left" }
  * ]
  */
 export default function CornerActions({ config }) {
@@ -18,7 +26,14 @@ export default function CornerActions({ config }) {
 
   const actions = useMemo(() => {
     const list = Array.isArray(config?.CornerActions) ? config.CornerActions : [];
-    return list.filter((a) => a && a.text);
+    return list
+      .filter((a) => a && a.text)
+      .map((a) => ({
+        ...a,
+        // 默认都显示（不写就显示）
+        showOnMobile: a.showOnMobile !== false,
+        showOnDesktop: a.showOnDesktop !== false,
+      }));
   }, [config]);
 
   if (!actions.length) return null;
@@ -40,11 +55,23 @@ export default function CornerActions({ config }) {
     }
   };
 
+  // ✅ 关键：不依赖 cornerTopLeft/cornerTopRight 的 media rules 来“隐藏”
+  // 而是对每个按钮独立加：mobileOnly / desktopOnly
+  const getDeviceClass = (showOnMobile, showOnDesktop) => {
+    if (showOnMobile && showOnDesktop) return "";
+    if (showOnMobile && !showOnDesktop) return styles.mobileOnly;   // 只在移动端显示
+    if (!showOnMobile && showOnDesktop) return styles.desktopOnly;  // 只在桌面端显示
+    return styles.hiddenAlways; // 两端都不显示（极少用，防御性）
+  };
+
   return (
     <>
       {actions.map((a) => {
         const posClass = getPosClass(a.position);
+        const deviceClass = getDeviceClass(a.showOnMobile, a.showOnDesktop);
+
         const iconSrc = a.iconUrl || a.icon || "";
+        const isIntro = (a.type || "link") === "intro";
 
         const content = (
           <span className={styles.cornerBtnInner}>
@@ -55,10 +82,15 @@ export default function CornerActions({ config }) {
           </span>
         );
 
-        const isIntro = (a.type || "link") === "intro";
-
-        // ✅ 关键：给 intro 单独加 styles.introBtn，方便桌面端隐藏“自我介绍”而不影响其他左上角按钮
-        const className = `${styles.cornerBtn} ${posClass} ${isIntro ? styles.introBtn : ""}`;
+        // ✅ introBtn 只用于“你可能想单独给自我介绍做样式/隐藏”，不再绑定 position 做隐藏
+        const className = [
+          styles.cornerBtn,
+          posClass,
+          deviceClass,
+          isIntro ? styles.introBtn : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
 
         if (isIntro) {
           return (
@@ -74,10 +106,12 @@ export default function CornerActions({ config }) {
           );
         }
 
+        const href = a.href || a.link || "#";
+
         return (
           <a
             key={a.id || a.text}
-            href={a.href || a.link || "#"}
+            href={href}
             target="_blank"
             rel="noreferrer"
             className={className}
@@ -95,8 +129,8 @@ export default function CornerActions({ config }) {
 
         <Modal.Body>
           {(config?.BannerContent || []).length ? (
-            (config.BannerContent || []).map((t) => (
-              <p key={t} style={{ marginBottom: 8 }}>
+            (config.BannerContent || []).map((t, idx) => (
+              <p key={`${t}-${idx}`} style={{ marginBottom: 8 }}>
                 {t}
               </p>
             ))
