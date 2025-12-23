@@ -235,6 +235,35 @@
     opacity: 1;
   }
 
+  /* GIF 卡片：与 introBox 同级定位，但更靠下，形成第二张卡片 */
+  .gifBox {
+    position: relative;
+    left: 40%;
+    top: -78%;          /* 这一行决定“第二张卡片”和第一张的距离 */
+    width: 55%;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  .gifBoxInnerDiv {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    border: 2px solid #a083a0;
+    padding: 0.75rem;
+  }
+
+  .titleCol:hover .gifBox {
+    opacity: 1;
+  }
+
+  .bannerGif {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0.75rem;
+  }
+
   .titleCol:hover .titleBox {
     position: relative;
     transform: translateX(-30%);

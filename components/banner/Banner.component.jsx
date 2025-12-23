@@ -17,7 +17,7 @@ export default function Banner({ songCount, config }) {
         href={"https://music.163.com/#/artist?id=" + id}
         target="_blank"
         rel="noopener noreferrer"
-        title={config?.Name + "的网易云音乐主页"}
+        title={(config?.Name || "") + "的网易云音乐主页"}
         style={{ marginRight: "1rem", cursor: getCursor() }}
       >
         <Image
@@ -39,7 +39,7 @@ export default function Banner({ songCount, config }) {
         href={"https://y.qq.com/n/ryqq/singer/" + id}
         target="_blank"
         rel="noopener noreferrer"
-        title={config?.Name + "的QQ音乐主页"}
+        title={(config?.Name || "") + "的QQ音乐主页"}
         style={{ cursor: getCursor() }}
       >
         <Image
@@ -63,6 +63,7 @@ export default function Banner({ songCount, config }) {
       {/* 顶部头像标题区 */}
       <div className={"pt-3 " + styles.titleBox}>
         <CornerActions config={config} />
+
         <Image
           loader={imageLoader}
           className={styles.avatar}
@@ -72,6 +73,7 @@ export default function Banner({ songCount, config }) {
           height={250}
           priority
         />
+
         <h1 className={"display-6 text-center pt-3 " + styles.grandTitle}>
           {config?.Name}
         </h1>
@@ -79,16 +81,12 @@ export default function Banner({ songCount, config }) {
           和她拿手的<b>{songCount}</b>首歌
         </h1>
 
-        <p className="text-center py-3 mb-xl-5 text-muted">
-          可以点击歌名复制哦
-        </p>
+        <p className="text-center py-3 mb-xl-5 text-muted">可以点击歌名复制哦</p>
       </div>
 
-      {/* Banner 内部卡片 */}
+      {/* 卡片1：碎碎念 */}
       <div className={styles.introBox}>
-
         <div className={styles.introBoxInnerDiv}>
-
           <div className={styles.introTitle}>
             <h5>{config?.BannerTitle}</h5>
 
@@ -119,19 +117,21 @@ export default function Banner({ songCount, config }) {
             ))}
           </div>
         </div>
+      </div>
 
-        {gifImg ? (
-          <div className={styles.gifRow}>
-           <img
-            src={gifImg}
-            alt="装饰GIF"
-            className={styles.bannerGif}
-            loading="lazy"
-           />
+      {/* 卡片2：GIF（独立卡片，不和上面连着） */}
+      {gifImg ? (
+        <div className={styles.gifBox}>
+          <div className={styles.gifBoxInnerDiv}>
+            <img
+              src={gifImg}
+              alt="装饰GIF"
+              className={styles.bannerGif}
+              loading="lazy"
+            />
+          </div>
         </div>
       ) : null}
-
-      </div>
     </Col>
   );
 }
