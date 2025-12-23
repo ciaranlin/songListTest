@@ -1,6 +1,5 @@
 // config/constants.js
-// Default site configuration (used as fallback when no local overrides exist).
-// Note: This project uses Next.js (pages router) and ESM imports in client code.
+// Default site configuration (used as fallback when public/site-config.json does not exist).
 
 export const config = {
   Name: "星鱼咪来i",
@@ -17,9 +16,7 @@ export const config = {
   MoodCategories: ["舰长点歌"],
 
   BannerTitle: "日常碎碎念",
-  BannerContent: [
-    "吃饱了躺一会很",
-  ],
+  BannerContent: ["吃饱了躺一会很"],
 
   // Custom buttons shown on banner (name/link/icon image path)
   CustomButtons: [
@@ -35,13 +32,15 @@ export const config = {
     },
   ],
 
-  // Optional images uploaded from Config page (stored as DataURL in localStorage)
-  // These are empty by default.
-  LogoImage: "",
+  // Image paths (can be overridden by public/site-config.json).
+  // Uploading via /config will write to /public/uploads and update site-config.json.
+  LogoImage: "/assets/images/self_intro.webp",
   LogoImagePrev: "",
-  GifImage: "",
+
+  GifImage: "/assets/images/my.gif",
   GifImagePrev: "",
-  FaviconImage: "",
+
+  FaviconImage: "/favicon.png",
   FaviconImagePrev: "",
 };
 

@@ -1,0 +1,10 @@
+{
+  "Name": "示例主播",
+  "BiliLiveRoomID": "123456",
+  "BannerTitle": "示例标题",
+  "BannerContent": [
+    "示例文案 1",
+    "示例文案 2"
+  ],
+  "LogoImage": "/assets/images/self_intro.webp"
+}

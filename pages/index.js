@@ -18,7 +18,7 @@ import SongListFilter from '../components/SongListFilter.component'
 
 import imageLoader from '../utils/ImageLoader'
 import * as utils from '../utils/utils'
-import { getMergedConfig } from '../lib/siteConfigStore'
+import { getMergedConfig, getMergedConfigClient } from '../lib/siteConfigStore'
 
 
 export default function Home() {
@@ -47,7 +47,10 @@ export default function Home() {
   // ⭐ 动态加载 JSON（build 后仍可更新）
   // Load local config overrides (no backend)
   useEffect(() => {
-    setSiteConfig(getMergedConfig());
+    (async () => {
+      const merged = await getMergedConfigClient();
+      setSiteConfig(merged);
+    })();
   }, []);
 
   useEffect(() => {

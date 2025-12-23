@@ -2,53 +2,35 @@
 import { useEffect, useMemo, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { toast } from "react-toastify";
 import styles from "../styles/Manage.module.css";
 
 import {
   getDefaultConfig,
-  getMergedConfig,
-  replaceConfig,
+  getMergedConfigClient,
+  saveConfigToServer,
+  resetServerConfig,
   exportConfigToFile,
   importConfigFromFile,
-  resetConfig,
 } from "../lib/siteConfigStore";
-
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("read file failed"));
-    reader.readAsDataURL(file);
-  });
-}
 
 export default function ConfigPage() {
   const router = useRouter();
-  const [allowed, setAllowed] = useState(true);
-  const [status, setStatus] = useState({ type: "", msg: "" });
 
   const defaultConfig = useMemo(() => getDefaultConfig(), []);
-  const [form, setForm] = useState(() => getMergedConfig());
+  const [form, setForm] = useState(() => getDefaultConfig());
+  const [saving, setSaving] = useState(false);
 
-  // Light gate (no login): require localStorage.adminEnabled === 'true'
+  // Load server runtime config (if exists)
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const ok = localStorage.getItem("adminEnabled") === "true";
-    setAllowed(ok);
-    if (!ok) {
-      // keep the page simple: redirect home
-      router.replace("/");
-    }
-  }, [router]);
-
-  useEffect(() => {
-    setForm(getMergedConfig());
+    (async () => {
+      const merged = await getMergedConfigClient();
+      setForm(merged);
+    })();
   }, []);
 
-  const update = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const updateButton = (idx, key, value) => {
     const next = Array.isArray(form.CustomButtons) ? [...form.CustomButtons] : [];
@@ -67,69 +49,87 @@ export default function ConfigPage() {
     update("CustomButtons", next);
   };
 
-  const onSave = () => {
-    // Store only overrides (replaceConfig will sanitize keys)
-    replaceConfig(form);
-    setStatus({ type: "success", msg: "已保存，刷新/返回首页即可看到效果。" });
+  const onSave = async () => {
+    try {
+      setSaving(true);
+      await saveConfigToServer(form);
+      toast.success("已保存到服务器：public/site-config.json（立即生效，刷新页面即可看到）。");
+    } catch (e) {
+      toast.error(String(e?.message || "保存失败"));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const onReset = () => {
-    if (!confirm("确认恢复为默认配置？这会清空本地覆盖配置。")) return;
-    resetConfig();
-    setForm(getMergedConfig());
-    setStatus({ type: "success", msg: "已恢复默认（已清空本地覆盖配置）。" });
+  const onReset = async () => {
+    if (!confirm("确认恢复为默认配置？会删除服务器上的 site-config.json 并回退到 constants.js。")) return;
+    try {
+      setSaving(true);
+      await resetServerConfig();
+      const merged = await getMergedConfigClient();
+      setForm(merged);
+      toast.success("已重置为默认配置。");
+    } catch (e) {
+      toast.error(String(e?.message || "重置失败"));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onExport = () => {
-    exportConfigToFile();
-    setStatus({ type: "success", msg: "已导出 JSON（仅包含本地覆盖配置）。" });
+    exportConfigToFile(form, "site-config.json");
+    toast.success("已导出：site-config.json");
   };
 
   const onImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      await importConfigFromFile(file);
-      setForm(getMergedConfig());
-      setStatus({ type: "success", msg: "导入成功。" });
-    } catch (err) {
-      setStatus({ type: "danger", msg: "导入失败：JSON 无效或字段不合法。" });
+      const data = await importConfigFromFile(file);
+      setForm((prev) => ({ ...prev, ...data }));
+      toast.success("已载入 JSON，记得点击「保存」写入服务器。");
+    } catch {
+      toast.error("导入失败：JSON 无效。");
     } finally {
       e.target.value = "";
     }
   };
 
-  // ===== Image upload with previous version kept once =====
-  const onPickImage = async (e, key, maxKB) => {
+  // ===== Upload image to /public/uploads, keep 1 previous version =====
+  const uploadImage = async (key, file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const res = await fetch(`/api/upload?key=${encodeURIComponent(key)}`, {
+      method: "POST",
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || "上传失败");
+    return data;
+  };
+
+  const onPickImage = async (e, key) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const kb = Math.round(file.size / 1024);
-    if (maxKB && kb > maxKB) {
-      setStatus({
-        type: "warning",
-        msg: `图片过大：${kb}KB，建议小于 ${maxKB}KB（localStorage 容量有限）。`,
-      });
-      e.target.value = "";
-      return;
-    }
-
     try {
-      const dataUrl = await readFileAsDataURL(file);
+      setSaving(true);
+      const data = await uploadImage(key, file);
+
       setForm((prev) => {
         const prevKey = `${key}Prev`;
-        const current = prev[key] || "";
-        // keep one previous version only when uploading a new different image
-        const next = { ...prev, [key]: dataUrl };
-        if (current && current !== dataUrl) {
-          next[prevKey] = current;
-        }
+        const next = { ...prev, [key]: data.path };
+        // keep one previous version (server returns prevPath if moved)
+        if (data.prevPath) next[prevKey] = data.prevPath;
+        else if (prev[key] && prev[key] !== data.path) next[prevKey] = prev[key];
         return next;
       });
-      setStatus({ type: "success", msg: "图片已读取，记得点击「保存」。" });
-    } catch {
-      setStatus({ type: "danger", msg: "读取图片失败，请重试。" });
+
+      toast.success("图片已上传（已保留上一版）。记得点击「保存」。");
+    } catch (err) {
+      toast.error(String(err?.message || "上传失败"));
     } finally {
+      setSaving(false);
       e.target.value = "";
     }
   };
@@ -140,18 +140,15 @@ export default function ConfigPage() {
       const cur = prev[key] || "";
       const old = prev[prevKey] || "";
       if (!old) return prev;
-      // swap current and previous
       return { ...prev, [key]: old, [prevKey]: cur };
     });
-    setStatus({ type: "success", msg: "已恢复上一版图片，记得点击「保存」。" });
+    toast.success("已切回上一版图片，记得点击「保存」。");
   };
 
   const clearImage = (key) => {
     setForm((prev) => ({ ...prev, [key]: "" }));
-    setStatus({ type: "success", msg: "已清除当前图片，记得点击「保存」。" });
+    toast.success("已清除当前图片，记得点击「保存」。");
   };
-
-  if (!allowed) return null;
 
   return (
     <div className={styles.wrapper}>
@@ -162,16 +159,10 @@ export default function ConfigPage() {
       <Container>
         <h1 className={styles.title}>⚙️ 配置页</h1>
         <div style={{ color: "#666", marginBottom: 16 }}>
-          这里的修改会保存到浏览器 localStorage，并在全站生效（无需后台、无需登录）。
+          这里的修改会写入服务器文件 <code>public/site-config.json</code>，全站读取时会<strong>优先使用它</strong>；
+          如果没有该文件，会自动回退到 <code>config/constants.js</code> 默认配置。
         </div>
 
-        {status?.msg ? (
-          <Alert variant={status.type || "info"} onClose={() => setStatus({ type: "", msg: "" })} dismissible>
-            {status.msg}
-          </Alert>
-        ) : null}
-
-        {/* ===== Basic fields ===== */}
         <Form>
           <Row className="g-3">
             <Col md={6}>
@@ -242,172 +233,135 @@ export default function ConfigPage() {
 
             <Col md={12}>
               <Form.Group>
-                <Form.Label>Banner 文案（每行一条，BannerContent）</Form.Label>
+                <Form.Label>Banner 文案（每行一条）</Form.Label>
                 <Form.Control
                   as="textarea"
-                  rows={5}
-                  value={(form.BannerContent || []).join("\n")}
-                  onChange={(e) =>
-                    update(
-                      "BannerContent",
-                      e.target.value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
+                  rows={4}
+                  value={Array.isArray(form.BannerContent) ? form.BannerContent.join("\n") : ""}
+                  onChange={(e) => update("BannerContent", e.target.value.split(/\r?\n/).filter(Boolean))}
                   placeholder={(defaultConfig.BannerContent || []).join("\n")}
                 />
               </Form.Group>
             </Col>
+
+            <Col md={12}>
+              <hr />
+              <h3 style={{ marginBottom: 8 }}>自定义按钮（CustomButtons）</h3>
+              <div style={{ color: "#666", marginBottom: 10 }}>
+                每行一个按钮：名称 / 链接 / 图标路径（建议放到 public/assets 或 public/uploads）
+              </div>
+
+              {(form.CustomButtons || []).map((btn, idx) => (
+                <Row key={idx} className="g-2" style={{ marginBottom: 8 }}>
+                  <Col md={3}>
+                    <Form.Control
+                      value={btn.name || ""}
+                      placeholder="名称"
+                      onChange={(e) => updateButton(idx, "name", e.target.value)}
+                    />
+                  </Col>
+                  <Col md={5}>
+                    <Form.Control
+                      value={btn.link || ""}
+                      placeholder="https://..."
+                      onChange={(e) => updateButton(idx, "link", e.target.value)}
+                    />
+                  </Col>
+                  <Col md={3}>
+                    <Form.Control
+                      value={btn.image || ""}
+                      placeholder="/assets/icon/xxx.png 或 /uploads/xxx.png"
+                      onChange={(e) => updateButton(idx, "image", e.target.value)}
+                    />
+                  </Col>
+                  <Col md={1}>
+                    <Button variant="outline-danger" onClick={() => removeButton(idx)}>
+                      删除
+                    </Button>
+                  </Col>
+                </Row>
+              ))}
+
+              <Button variant="outline-primary" onClick={addButton}>
+                + 新增按钮
+              </Button>
+            </Col>
+
+            <Col md={12}>
+              <hr />
+              <h3 style={{ marginBottom: 12 }}>图片上传（写入 public/uploads，保留上一版）</h3>
+
+              {/* Logo */}
+              <Row className="g-2" style={{ alignItems: "center" }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0 }}>LogoImage</Form.Label>
+                </Col>
+                <Col md={5}>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "LogoImage")} />
+                </Col>
+                <Col md={4} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {form.LogoImage ? <img src={form.LogoImage} alt="logo" style={{ height: 44, borderRadius: 10 }} /> : <span style={{ color: "#999" }}>未设置</span>}
+                  <Button size="sm" variant="outline-danger" onClick={() => clearImage("LogoImage")}>清除</Button>
+                  <Button size="sm" variant="outline-secondary" disabled={!form.LogoImagePrev} onClick={() => restorePrevImage("LogoImage")}>返回上一版</Button>
+                </Col>
+              </Row>
+
+              <div style={{ height: 12 }} />
+
+              {/* Gif */}
+              <Row className="g-2" style={{ alignItems: "center" }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0 }}>GifImage</Form.Label>
+                </Col>
+                <Col md={5}>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "GifImage")} />
+                </Col>
+                <Col md={4} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {form.GifImage ? <img src={form.GifImage} alt="gif" style={{ height: 54, borderRadius: 10 }} /> : <span style={{ color: "#999" }}>未设置</span>}
+                  <Button size="sm" variant="outline-danger" onClick={() => clearImage("GifImage")}>清除</Button>
+                  <Button size="sm" variant="outline-secondary" disabled={!form.GifImagePrev} onClick={() => restorePrevImage("GifImage")}>返回上一版</Button>
+                </Col>
+              </Row>
+
+              <div style={{ height: 12 }} />
+
+              {/* Favicon */}
+              <Row className="g-2" style={{ alignItems: "center" }}>
+                <Col md={3}>
+                  <Form.Label style={{ marginBottom: 0 }}>FaviconImage</Form.Label>
+                </Col>
+                <Col md={5}>
+                  <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "FaviconImage")} />
+                </Col>
+                <Col md={4} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {form.FaviconImage ? <img src={form.FaviconImage} alt="favicon" style={{ height: 32, borderRadius: 8 }} /> : <span style={{ color: "#999" }}>未设置</span>}
+                  <Button size="sm" variant="outline-danger" onClick={() => clearImage("FaviconImage")}>清除</Button>
+                  <Button size="sm" variant="outline-secondary" disabled={!form.FaviconImagePrev} onClick={() => restorePrevImage("FaviconImage")}>返回上一版</Button>
+                </Col>
+              </Row>
+            </Col>
+
+            <Col md={12}>
+              <hr />
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Button onClick={onSave} disabled={saving}>{saving ? "处理中..." : "保存"}</Button>
+                <Button variant="outline-secondary" onClick={onReset} disabled={saving}>恢复默认</Button>
+                <Button variant="outline-dark" onClick={onExport}>导出 JSON</Button>
+
+                <label className="btn btn-outline-primary" style={{ marginBottom: 0 }}>
+                  选择文件导入
+                  <input type="file" accept="application/json" onChange={onImport} hidden />
+                </label>
+
+                <Button variant="outline-secondary" onClick={() => router.push("/")}>返回首页</Button>
+              </div>
+
+              <div style={{ marginTop: 10, color: "#888", fontSize: 12 }}>
+                提示：图片会上传到 <code>public/uploads</code>，配置页保存会写入 <code>public/site-config.json</code>。
+                在开发模式下刷新即可生效；生产环境同样会立即生效（无缓存时）。若你用了 CDN/反代缓存，需要为 <code>/site-config.json</code> 关闭缓存或加缓存刷新策略。
+              </div>
+            </Col>
           </Row>
-
-          <hr style={{ margin: "22px 0" }} />
-
-          {/* ===== Images upload (with one previous version kept) ===== */}
-          <h4 style={{ fontWeight: 800, marginBottom: 12 }}>图片上传（保存到本地，可恢复上一版）</h4>
-          <div style={{ color: "#777", marginBottom: 12, fontSize: 13 }}>
-            注意：localStorage 容量有限，建议图片压缩后再上传（Logo &lt; 300KB，GIF &lt; 800KB，Favicon &lt; 80KB）。
-          </div>
-
-          <Row className="g-3">
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>Logo 图片（LogoImage）</Form.Label>
-                <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "LogoImage", 300)} />
-                {form.LogoImage ? (
-                  <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                    <img src={form.LogoImage} alt="logo" style={{ height: 44, borderRadius: 10 }} />
-                    <Button size="sm" variant="outline-danger" onClick={() => clearImage("LogoImage")}>
-                      清除当前
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-secondary"
-                      disabled={!form.LogoImagePrev}
-                      onClick={() => restorePrevImage("LogoImage")}
-                    >
-                      恢复上一版
-                    </Button>
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 8, color: "#888", fontSize: 13 }}>当前未设置</div>
-                )}
-              </Form.Group>
-            </Col>
-
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>GIF 卡片图片（GifImage）</Form.Label>
-                <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "GifImage", 800)} />
-                {form.GifImage ? (
-                  <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                    <img src={form.GifImage} alt="gif" style={{ height: 60, borderRadius: 10 }} />
-                    <Button size="sm" variant="outline-danger" onClick={() => clearImage("GifImage")}>
-                      清除当前
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-secondary"
-                      disabled={!form.GifImagePrev}
-                      onClick={() => restorePrevImage("GifImage")}
-                    >
-                      恢复上一版
-                    </Button>
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 8, color: "#888", fontSize: 13 }}>当前未设置（将使用默认 /assets/images/my.gif）</div>
-                )}
-              </Form.Group>
-            </Col>
-
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>Favicon 图片（FaviconImage）</Form.Label>
-                <Form.Control type="file" accept="image/*" onChange={(e) => onPickImage(e, "FaviconImage", 80)} />
-                {form.FaviconImage ? (
-                  <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                    <img src={form.FaviconImage} alt="favicon" style={{ height: 28, width: 28, borderRadius: 8 }} />
-                    <Button size="sm" variant="outline-danger" onClick={() => clearImage("FaviconImage")}>
-                      清除当前
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-secondary"
-                      disabled={!form.FaviconImagePrev}
-                      onClick={() => restorePrevImage("FaviconImage")}
-                    >
-                      恢复上一版
-                    </Button>
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 8, color: "#888", fontSize: 13 }}>当前未设置（将使用 /favicon.png）</div>
-                )}
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <hr style={{ margin: "22px 0" }} />
-
-          {/* ===== Custom buttons ===== */}
-          <h4 style={{ fontWeight: 800, marginBottom: 12 }}>自定义按钮（CustomButtons）</h4>
-
-          {(form.CustomButtons || []).map((btn, idx) => (
-            <Row className="g-2" key={idx} style={{ marginBottom: 10 }}>
-              <Col md={3}>
-                <Form.Control
-                  placeholder="按钮名称"
-                  value={btn.name || ""}
-                  onChange={(e) => updateButton(idx, "name", e.target.value)}
-                />
-              </Col>
-              <Col md={5}>
-                <Form.Control
-                  placeholder="跳转链接 URL"
-                  value={btn.link || ""}
-                  onChange={(e) => updateButton(idx, "link", e.target.value)}
-                />
-              </Col>
-              <Col md={3}>
-                <Form.Control
-                  placeholder="图标路径（/assets/...）或 URL"
-                  value={btn.image || ""}
-                  onChange={(e) => updateButton(idx, "image", e.target.value)}
-                />
-              </Col>
-              <Col md={1} style={{ display: "flex" }}>
-                <Button variant="outline-danger" onClick={() => removeButton(idx)} style={{ width: "100%" }}>
-                  删除
-                </Button>
-              </Col>
-            </Row>
-          ))}
-
-          <Button variant="outline-primary" onClick={addButton}>
-            + 新增按钮
-          </Button>
-
-          <hr style={{ margin: "22px 0" }} />
-
-          {/* ===== actions ===== */}
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <Button variant="primary" onClick={onSave}>
-              保存
-            </Button>
-            <Button variant="outline-secondary" onClick={onReset}>
-              恢复默认
-            </Button>
-            <Button variant="outline-secondary" onClick={onExport}>
-              导出 JSON
-            </Button>
-            <Form.Label style={{ margin: 0 }}>
-              <Form.Control type="file" accept="application/json" onChange={onImport} />
-            </Form.Label>
-            <Button variant="outline-secondary" onClick={() => router.push("/")}>
-              返回首页
-            </Button>
-          </div>
-
-          <div style={{ marginTop: 10, color: "#777", fontSize: 13 }}>
-            提示：导入会覆盖当前配置；导出仅包含你的本地覆盖配置（默认值不会写入）。
-          </div>
         </Form>
       </Container>
     </div>

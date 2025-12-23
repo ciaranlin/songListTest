@@ -19,7 +19,8 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-bootstrap": "^2.10.10",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "formidable": "^3.5.4"
   },
   "devDependencies": {
     "eslint": "^9.39.2",
