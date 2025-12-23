@@ -69,10 +69,11 @@
   position: absolute;
   top: 10%;
 
-  left: 50%;                 /* ⭐ 关键 */
-  transform: translateX(10%);/* ⭐ 微调到头像右侧 */
+  /* ✅ 关键：固定在头像区域右侧，不再用 right:4% */
+  left: calc(50% + 220px);   /* ⭐ 先给一个“靠近头像”的基准 */
+  transform: translateX(0);  /* 不要再用 translateX(%) 猜 */
 
-  width: min(620px, 54%);
+  width: min(520px, 42%);    /* ✅ 更接近你旧版的窄一些效果 */
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -81,6 +82,7 @@
   pointer-events: none;
   transition: opacity 1s;
 }
+
 
 
 .titleCol:hover .bannerRight {
