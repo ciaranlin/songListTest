@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  trailingSlash: true,
+  // Fix: avoid 308 redirect (/api/getSongs -> /api/getSongs/)
+  trailingSlash: false,
+
   images: {
-    loader: 'custom'
+    loader: "custom",
   },
-  eslint: {
-    // Keep builds from failing due to lint rules in older code.
-    ignoreDuringBuilds: true
-  }
 };
 
 module.exports = nextConfig;
