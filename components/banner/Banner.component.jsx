@@ -15,15 +15,7 @@ import BannerButton from "./BannerButton.component";
 export default function Banner({ songCount, config }) {
   const netEaseMusicComponent = (id) => {
     return id ? (
-      <Link href={"https://music.163.com/#/artist?id=" + id} passHref>
-        <a
-          target="_blank"
-          style={{
-            marginRight: "1rem",
-            cursor: getCursor(),
-          }}
-          title={config.Name + "的网易云音乐主页"}
-        >
+      <Link href={"https://music.163.com/#/artist?id=" + id} target="_blank" rel="noopener noreferrer" title={config.Name + "的网易云音乐主页"} style={{ marginRight: "1rem", cursor: getCursor() }}>
           <Image
             loader={imageLoader}
             src="./assets/icon/163_music.ico"
@@ -31,8 +23,7 @@ export default function Banner({ songCount, config }) {
             width={24}
             height={24}
           />
-        </a>
-      </Link>
+                </Link>
     ) : (
       ""
     );
@@ -40,14 +31,7 @@ export default function Banner({ songCount, config }) {
 
   const qqMusicComponent = (id) => {
     return id ? (
-      <Link href={"https://y.qq.com/n/ryqq/singer/" + id} passHref>
-        <a
-          target="_blank"
-          style={{
-            cursor: getCursor(),
-          }}
-          title={config.Name + "的QQ音乐主页"}
-        >
+      <Link href={"https://y.qq.com/n/ryqq/singer/" + id} target="_blank" rel="noopener noreferrer" title={config.Name + "的QQ音乐主页"} style={{ cursor: getCursor() }}>
           <Image
             loader={imageLoader}
             src="./assets/icon/qq_music.ico"
@@ -55,8 +39,7 @@ export default function Banner({ songCount, config }) {
             width={24}
             height={24}
           />
-        </a>
-      </Link>
+                </Link>
     ) : (
       ""
     );

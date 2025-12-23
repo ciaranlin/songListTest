@@ -14,16 +14,14 @@ export default function BannerButton({
     style
 }) {
   return (
-    <Link href={link} key={link} passHref>
-      <a target="_blank">
-        <Button
+    <Link href={link} target="_blank" rel="noopener noreferrer">
+      <Button
           className={styles.customRandomButton}
           style={style}
         >
           <img className={styles.biliIcon} src={image} /> {name}{" "}
           <ChevronSVG />
         </Button>
-      </a>
     </Link>
   );
 }

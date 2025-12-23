@@ -161,9 +161,8 @@ export default function Home() {
   return (
     <div className={styles.outerContainer}>
 
-      <Link href={"https://live.bilibili.com/" + siteConfig.BiliLiveRoomID} passHref>
-        <a target="_blank" style={{ textDecoration: "none", color: "#1D0C26" }}>
-          <div className={styles.goToLiveDiv}>
+      <Link href={"https://live.bilibili.com/" + siteConfig.BiliLiveRoomID} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", color: "#1D0C26" }}>
+        <div className={styles.goToLiveDiv}>
             <div className={styles.cornerToggle}>
               <Image
                 loader={imageLoader}
@@ -175,8 +174,7 @@ export default function Home() {
               <b><i>去直播间</i></b>
             </div>
           </div>
-        </a>
-      </Link>
+              </Link>
 
 
       <div className={styles.offCanvasToggleDiv} onClick={handleShowIntro}>
