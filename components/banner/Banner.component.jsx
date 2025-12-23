@@ -86,6 +86,7 @@ export default function Banner({ songCount, config }) {
 
       {/* Banner 内部卡片 */}
       <div className={styles.introBox}>
+
         <div className={styles.introBoxInnerDiv}>
 
           <div className={styles.introTitle}>
@@ -97,17 +98,6 @@ export default function Banner({ songCount, config }) {
               {qqMusicComponent(config?.QQMusicId)}
             </div>
           </div>
-
-          {gifImg ? (
-            <div className={styles.gifRow}>
-              <img
-                src={gifImg}
-                alt="装饰GIF"
-                className={styles.bannerGif}
-                loading="lazy"
-              />
-            </div>
-         ) : null}
 
           {/* 首页文本 */}
           {(config?.BannerContent || []).map((cnt) => (
@@ -129,6 +119,18 @@ export default function Banner({ songCount, config }) {
             ))}
           </div>
         </div>
+
+        {gifImg ? (
+          <div className={styles.gifRow}>
+           <img
+            src={gifImg}
+            alt="装饰GIF"
+            className={styles.bannerGif}
+            loading="lazy"
+           />
+        </div>
+      ) : null}
+
       </div>
     </Col>
   );
