@@ -513,3 +513,20 @@
     display: inline-flex !important;
   }
 }
+
+/* Banner 按钮文字 */
+.bannerBtnText {
+  color: #1f2937 !important; /* 深灰 */
+  opacity: 1 !important;
+}
+
+/* 右侧箭头 SVG */
+.bannerBtnChevron svg {
+  color: #1f2937 !important;
+  opacity: 1 !important;
+}
+
+/* 整个按钮不允许被压透明 */
+.customRandomButton {
+  opacity: 1 !important;
+}
