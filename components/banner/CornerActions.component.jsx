@@ -2,25 +2,6 @@ import React, { useMemo, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import styles from "../../styles/Home.module.css";
 
-/**
- * CornerActions - 角落快捷按钮
- *
- * 支持字段（兼容旧字段）：
- * - id: string
- * - text: string（必填）
- * - type: "link" | "intro"（默认 link）
- * - href / link: 外链地址（type=link 时使用）
- * - position: "top-left" | "top-right" | "bottom-left" | "bottom-right"（默认 top-right）
- * - iconUrl / icon: 图标地址（可选）
- * - showOnMobile: boolean（默认 true）
- * - showOnDesktop: boolean（默认 true）
- *
- * config.CornerActions 示例：
- * [
- *   { "id":"intro", "text":"自我介绍", "type":"intro", "position":"top-left", "showOnDesktop": false },
- *   { "id":"live", "text":"去直播间", "type":"link", "href":"https://xxx", "position":"top-left" }
- * ]
- */
 export default function CornerActions({ config }) {
   const [showIntro, setShowIntro] = useState(false);
 
@@ -30,95 +11,109 @@ export default function CornerActions({ config }) {
       .filter((a) => a && a.text)
       .map((a) => ({
         ...a,
-        // 默认都显示（不写就显示）
+        position: a.position || "top-right",
         showOnMobile: a.showOnMobile !== false,
         showOnDesktop: a.showOnDesktop !== false,
+        type: a.type || "link",
       }));
   }, [config]);
+
+  const grouped = useMemo(() => {
+    const g = {
+      "top-left": [],
+      "top-right": [],
+      "bottom-left": [],
+      "bottom-right": [],
+    };
+    actions.forEach((a) => {
+      if (!g[a.position]) g[a.position] = [];
+      g[a.position].push(a);
+    });
+    return g;
+  }, [actions]);
+
+  const getDeviceClass = (showOnMobile, showOnDesktop) => {
+    if (showOnMobile && showOnDesktop) return "";
+    if (showOnMobile && !showOnDesktop) return styles.mobileOnly;
+    if (!showOnMobile && showOnDesktop) return styles.desktopOnly;
+    return styles.hiddenAlways;
+  };
+
+  const getStackClass = (position) => {
+    switch (position) {
+      case "top-left":
+        return styles.cornerStackTopLeft;
+      case "top-right":
+        return styles.cornerStackTopRight;
+      case "bottom-left":
+        return styles.cornerStackBottomLeft;
+      case "bottom-right":
+      default:
+        return styles.cornerStackBottomRight;
+    }
+  };
 
   if (!actions.length) return null;
 
   const openIntro = () => setShowIntro(true);
   const closeIntro = () => setShowIntro(false);
 
-  const getPosClass = (position) => {
-    switch (position) {
-      case "top-left":
-        return styles.cornerTopLeft;
-      case "bottom-left":
-        return styles.cornerBottomLeft;
-      case "bottom-right":
-        return styles.cornerBottomRight;
-      case "top-right":
-      default:
-        return styles.cornerTopRight;
-    }
-  };
+  const renderAction = (a) => {
+    const iconSrc = a.iconUrl || a.icon || "";
+    const isIntro = a.type === "intro";
+    const deviceClass = getDeviceClass(a.showOnMobile, a.showOnDesktop);
 
-  // ✅ 关键：不依赖 cornerTopLeft/cornerTopRight 的 media rules 来“隐藏”
-  // 而是对每个按钮独立加：mobileOnly / desktopOnly
-  const getDeviceClass = (showOnMobile, showOnDesktop) => {
-    if (showOnMobile && showOnDesktop) return "";
-    if (showOnMobile && !showOnDesktop) return styles.mobileOnly;   // 只在移动端显示
-    if (!showOnMobile && showOnDesktop) return styles.desktopOnly;  // 只在桌面端显示
-    return styles.hiddenAlways; // 两端都不显示（极少用，防御性）
+    const className = [
+      styles.cornerBtn,
+      deviceClass,
+      isIntro ? styles.introBtn : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const content = (
+      <span className={styles.cornerBtnInner}>
+        {iconSrc ? <img src={iconSrc} alt="" className={styles.cornerBtnIcon} /> : null}
+        <span>{a.text}</span>
+      </span>
+    );
+
+    if (isIntro) {
+      return (
+        <button
+          key={a.id || a.text}
+          type="button"
+          className={className}
+          onClick={openIntro}
+          title={a.text}
+        >
+          {content}
+        </button>
+      );
+    }
+
+    return (
+      <a
+        key={a.id || a.text}
+        href={a.href || a.link || "#"}
+        target="_blank"
+        rel="noreferrer"
+        className={className}
+        title={a.text}
+      >
+        {content}
+      </a>
+    );
   };
 
   return (
     <>
-      {actions.map((a) => {
-        const posClass = getPosClass(a.position);
-        const deviceClass = getDeviceClass(a.showOnMobile, a.showOnDesktop);
-
-        const iconSrc = a.iconUrl || a.icon || "";
-        const isIntro = (a.type || "link") === "intro";
-
-        const content = (
-          <span className={styles.cornerBtnInner}>
-            {iconSrc ? (
-              <img src={iconSrc} alt="" className={styles.cornerBtnIcon} />
-            ) : null}
-            <span>{a.text}</span>
-          </span>
-        );
-
-        // ✅ introBtn 只用于“你可能想单独给自我介绍做样式/隐藏”，不再绑定 position 做隐藏
-        const className = [
-          styles.cornerBtn,
-          posClass,
-          deviceClass,
-          isIntro ? styles.introBtn : "",
-        ]
-          .filter(Boolean)
-          .join(" ");
-
-        if (isIntro) {
-          return (
-            <button
-              key={a.id || a.text}
-              type="button"
-              className={className}
-              onClick={openIntro}
-              title={a.text}
-            >
-              {content}
-            </button>
-          );
-        }
-
-        const href = a.href || a.link || "#";
-
+      {Object.entries(grouped).map(([pos, list]) => {
+        if (!list.length) return null;
         return (
-          <a
-            key={a.id || a.text}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className={className}
-            title={a.text}
-          >
-            {content}
-          </a>
+          <div key={pos} className={getStackClass(pos)}>
+            {list.map(renderAction)}
+          </div>
         );
       })}
 

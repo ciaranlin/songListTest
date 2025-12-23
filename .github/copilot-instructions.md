@@ -1,38 +1,34 @@
-# AI 助手使用说明（针对 vup-song-list 项目）
+# AI 助手使用说明（vup-song-list 项目）
 
-目的：帮助 AI 编码代理快速理解本仓库架构、数据流与常见修改点，给出可执行的代码/补丁建议。
+目的：帮助 AI 编码代理快速上手本仓库，做出安全、最小变更并遵守项目约定的代码/补丁。
 
-要点快照
+要点速览
 
-- 框架：Next.js（pages 路由），前端与简单 API（pages/api/\*）同仓库运行。
-- 数据源：单一 JSON 文件 public/music_list.json，由 API 读写（无外部 DB）。
-- 写入约定：所有写入 API（addSong/updateSong/deleteSong）使用全局写入队列（safeWriteJSON），请不要直接并发写入或移除此机制。
-- Node 版本：要求 Node >= 20（见 package.json engines）。开发命令：`npm run dev`（端口 5172）、`npm run build`、`npm start`。
+- 框架：Next.js（pages 路由）。前端页面与轻量 API 共存于 `pages/` 下（例：`pages/index.js`, `pages/api/*`）。
+- 数据主源：`public/music_list.json`（单文件 JSON），API 负责读写并保证一致性；请勿直接并发写入该文件。
+- 写入约定：所有写入操作应通过现有 API 的写入队列（safe write pattern）执行，避免直接修改 JSON。参见 `pages/api/addSong.js` 的实现样式。
+- Node 要求：Node >= 20（参见 `package.json` 的 engines 字段）。开发脚本：`npm run dev`、`npm run build`、`npm start`。
 
-关键文件与示例
+关键位置与典型调用示例
 
-- 前端页面：[pages/index.js](pages/index.js) —— 搜索、过滤、展示与交互入口（示例：调用 `/api/getSongs`）。
-- API 层：
-  - [pages/api/getSongs.js](pages/api/getSongs.js) —— 从 `public/music_list.json` 读取并返回 `songs` 数组（兼容数组或 { songs: [] } 两种结构）。
-  - [pages/api/addSong.js](pages/api/addSong.js) 与 [pages/api/deleteSong.js](pages/api/deleteSong.js) —— 写入时使用写入队列；`deleteSong` 会先同步返回成功，再后台执行写入。
-- 配置：`config/constants.js` 与 `lib/siteConfigStore.js` 管理站点可覆盖配置（本地覆盖可用于自定义按钮/图片）。
-- 数据样例字段：`index, song_name, artist, language, initial, remarks, sticky_top, paid, mood, BVID`。
-- 组件示例：`components/SongDetail.component.jsx`（表格行渲染），`components/manage/AddSongForm.jsx`（管理端表单演示）。
+- 页面入口：`pages/index.js` — 搜索、过滤与展示入口，调用 `GET /api/getSongs` 获取歌曲列表。
+- 读取 API：`pages/api/getSongs.js` — 从 `public/music_list.json` 读取并返回 `{ songs: [...] }`（兼容文件直接为数组或为对象）。
+- 写入 API：`pages/api/addSong.js`, `pages/api/deleteSong.js` 等 — 使用写入队列（safeWriteJSON）或相同模式以序列化磁盘写入；`deleteSong` 有时会先返回成功再异步写盘。
+- 配置与覆盖：`config/constants.js`、`lib/siteConfigStore.js` 与 `public/site-config.json` 支持站点级可配置项（本地覆盖会被优先读取）。
+- 重要组件：`components/SongDetail.component.jsx`、`components/SongListFilter.component.jsx`、`components/manage/AddSongForm.jsx`。
 
-工程与代码修改准则（针对 AI）
+项目约定（必须遵守）
 
-- 优先通过现有 API 修改数据，而非直接写入 `public/music_list.json`；API 内有并发保护与字段清洗逻辑。
-- 若需要新增后端行为，请复用写入队列模式（见 addSong.js），以避免文件损坏。
-- 前端改动优先小步提交：修改 `components/` 或 `pages/`，并保持 UI 对 `getSongs` 的调用不变。
-- 不要更改 `index` 自动生成与删除不重排的约定，除非同时更新所有调用方逻辑。
+- 永远通过 API 变更歌曲数据，除非在受控脚本中明确需要直接修改 `public/music_list.json` 并且处理了并发与索引。
+- 保持 `index` 字段的生成/顺序约定：不要随意重排索引；若需要改变索引规则，必须修改所有依赖方（前端过滤/排序、导出脚本等）。
+- 写入流程复用：新增或修改后端写入逻辑时，复用 `pages/api/addSong.js` 的写入队列/锁模式，避免并发覆盖。
+- 字段清洗与默认值：API 层会做基本字段清洗（如 `song_name`, `artist`, `language`, `paid`）；遵循现有字段格式以避免前端异常。
 
-常见任务示例（可直接生成代码片段）
+快速示例：添加歌曲
 
-- 添加歌曲（POST JSON）
-
-```
 POST /api/addSong
 Content-Type: application/json
+
 {
   "song_name": "歌名",
   "artist": "歌手",
@@ -40,20 +36,37 @@ Content-Type: application/json
   "remarks": "直播点歌",
   "paid": 0
 }
-```
 
-- 读取歌曲：`GET /api/getSongs` 返回 `{ songs: [...] }`。
+返回：标准 JSON 响应（参见 `pages/api/addSong.js`）
 
-调试与运行建议
+调试与常用命令
 
-- 本地运行：`npm run dev`（Node >= 20）。端口与主机已在脚本中固定为 `-H 0.0.0.0 -p 5172`。
-- 日志：API 会在控制台打印错误，查看终端输出以定位后端问题。
-- 编辑 JSON：手动编辑 `public/music_list.json` 时务必保持合法 JSON；优先通过 API 以保持索引与字段一致性。
+- 启动开发：`npm run dev`（项目 README 与 package.json 已声明 Node >= 20，默认端口/主机可在脚本中查看）。
+- 构建：`npm run build`；运行生产：`npm start`。
+- 查看日志：后端 API 在控制台输出错误，可通过开发终端观察请求与写入流程。
 
-AI 特定行为指南
+其他有用位置（快速索引）
 
-- 变更实现：使用最小修改集，保持组件接口不变（例如 `SongDetail` 接收 `filteredSongList`）。
-- 使用仓库提供的工具与约定（如 pinyin 用于中文首字母、写入队列用于文件写入）。
-- 编辑文件请使用仓库编辑工具（在此环境中使用 apply_patch），并在提交前运行 `npm run dev` 或至少静态检查改动。
+- 数据：`public/music_list.json`、`public/music_list_backup.json`
+- API：`pages/api/getSongs.js`、`pages/api/addSong.js`、`pages/api/deleteSong.js`
+- 组件：`components/SongDetail.component.jsx`、`components/manage/AddSongForm.jsx`
+- 配置：`config/constants.js`、`lib/siteConfigStore.js`、`public/site-config.json`
+- 辅助脚本：`scripts/modify_json.py`、`scripts/converter.py`（数据转换/批处理脚本）
 
-如果这份说明有缺漏或你需要补充例如 CI、测试或额外运行步骤，请告诉我要补充的方向。谢谢！
+注意事项与禁忌（针对自动修改）
+
+- 不要直接并发写 `public/music_list.json` 或移除写入队列；若需要新增写入端点，复用现有写队列实现。
+- 避免大规模一次性变更索引或字段命名。若必须变更，提供迁移脚本并更新前端/API 依赖。
+- 保持最小改动集：优先修改单一组件或 API，并手动或通过 CI 运行 `npm run dev` 验证主要页面（`pages/index.js`）是否仍能加载。
+
+如何扩展/新增功能（建议步骤）
+
+1. 在本地分支中实现小步改动（只改一个 API 或一个组件）。
+2. 在 API 中复用写入队列/锁模式，添加字段验证/清洗。参考 `pages/api/addSong.js`。
+3. 本地运行 `npm run dev` 并在浏览器验证 `GET /api/getSongs` 与相关页面行为。
+4. 提交补丁时提供简短说明（变更范围、为何需要、是否影响索引）。
+
+反馈与迭代
+
+请审阅此文档并指出缺漏（例如 CI、测试流程或特殊部署步骤）。我会根据你的反馈调整内容或补充示例代码片段。
+

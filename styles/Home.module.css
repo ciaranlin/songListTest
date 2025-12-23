@@ -302,8 +302,8 @@
 
 /* ✅ 永远贴浏览器窗口边（不跟随 banner 移动） */
 .cornerBtn {
-  position: fixed;
-  z-index: 9999;
+  position: relative;     /* ✅ 关键：不再 fixed */
+  z-index: 1;
 
   display: flex;
   flex-direction: column;
@@ -529,4 +529,40 @@
 /* 整个按钮不允许被压透明 */
 .customRandomButton {
   opacity: 1 !important;
+}
+
+/* ========= CornerActions：同角堆叠容器 ========= */
+
+.cornerStackTopLeft,
+.cornerStackTopRight,
+.cornerStackBottomLeft,
+.cornerStackBottomRight {
+  position: fixed;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;            /* ✅ 同角按钮之间的固定距离 */
+
+  /* 容器不吃背景，不影响视觉 */
+  pointer-events: none; /* 让容器不挡鼠标 */
+}
+
+.cornerStackTopLeft { top: 12px; left: 12px; }
+.cornerStackTopRight { top: 12px; right: 12px; }
+.cornerStackBottomLeft { bottom: 12px; left: 12px; }
+.cornerStackBottomRight { bottom: 12px; right: 12px; }
+
+/* ✅ 关键：按钮本身要能点击 */
+.cornerStackTopLeft .cornerBtn,
+.cornerStackTopRight .cornerBtn,
+.cornerStackBottomLeft .cornerBtn,
+.cornerStackBottomRight .cornerBtn {
+  pointer-events: auto;
+}
+
+/* 如果你希望 bottom 角是“向上堆叠”，用这个： */
+.cornerStackBottomLeft,
+.cornerStackBottomRight {
+  flex-direction: column-reverse;
 }
