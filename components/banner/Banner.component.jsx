@@ -88,6 +88,16 @@ export default function Banner({ songCount, config }) {
       <div className={styles.introBox}>
         <div className={styles.introBoxInnerDiv}>
 
+          <div className={styles.introTitle}>
+            <h5>{config?.BannerTitle}</h5>
+
+            {/* 网易云 & QQ音乐按钮 */}
+            <div className="d-flex">
+              {netEaseMusicComponent(config?.NetEaseMusicId)}
+              {qqMusicComponent(config?.QQMusicId)}
+            </div>
+          </div>
+
           {gifImg ? (
             <div className={styles.gifRow}>
               <img
@@ -98,15 +108,6 @@ export default function Banner({ songCount, config }) {
               />
             </div>
          ) : null}
-          <div className={styles.introTitle}>
-            <h5>{config?.BannerTitle}</h5>
-
-            {/* 网易云 & QQ音乐按钮 */}
-            <div className="d-flex">
-              {netEaseMusicComponent(config?.NetEaseMusicId)}
-              {qqMusicComponent(config?.QQMusicId)}
-            </div>
-          </div>
 
           {/* 首页文本 */}
           {(config?.BannerContent || []).map((cnt) => (
