@@ -68,12 +68,10 @@
 .bannerRight {
   position: absolute;
   top: 10%;
+  left: calc(50% - 220px);  /* ⭐ 往左拉近头像 */
+  transform: translateX(0);
 
-  /* ✅ 关键：固定在头像区域右侧，不再用 right:4% */
-  left: calc(50% + 50px);   /* ⭐ 先给一个“靠近头像”的基准 */
-  transform: translateX(0);  /* 不要再用 translateX(%) 猜 */
-
-  width: min(520px, 42%);    /* ✅ 更接近你旧版的窄一些效果 */
+  width: min(520px, 42%);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -82,6 +80,7 @@
   pointer-events: none;
   transition: opacity 1s;
 }
+
 
 
 
