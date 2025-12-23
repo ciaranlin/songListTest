@@ -2,10 +2,10 @@
 import { useState } from "react";
 import styles from "../../styles/Home.module.css";
 
-export default function AddSongForm({ onAdd }) {
+export default function AddSongForm({ onAdd, languageOptions }) {
   const [song_name, setName] = useState("");
   const [artist, setArtist] = useState("");
-  const [language, setLanguage] = useState("国语");
+  const [language, setLanguage] = useState((Array.isArray(languageOptions) && languageOptions[0]) ? languageOptions[0] : "国语");
   const [BVID, setBVID] = useState("");
   const [mood, setMood] = useState(""); // "" 或 "舰长点歌"
 
@@ -46,9 +46,9 @@ export default function AddSongForm({ onAdd }) {
         value={language}
         onChange={(e) => setLanguage(e.target.value)}
       >
-        <option value="国语">国语</option>
-        <option value="日语">日语</option>
-        <option value="英语">英语</option>
+        {(Array.isArray(languageOptions) && languageOptions.length ? languageOptions : ["国语","日语","英语"]).map((v) => (
+          <option key={v} value={v}>{v}</option>
+        ))}
       </select>
 
       <input

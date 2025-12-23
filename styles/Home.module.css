@@ -83,6 +83,25 @@
 }
 
 /* 两张卡片外层 */
+
+
+.introButtonsRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+@media (max-width: 1200px){
+  .introButtonsRow{
+    gap:12px;
+  }
+  .customRandomButton{
+    width: calc(50% - 6px);
+    justify-content: center;
+  }
+}
+
 .introBox,
 .gifBox {
   width: 100%;
@@ -125,8 +144,8 @@
    这里仅提供“按钮内部元素”的统一样式，不动你原按钮壳子 */
 
 .bannerBtnIcon {
-  width: 14px !important;
-  height: 14px !important;
+  width: 16px !important;
+  height: 16px !important;
   object-fit: contain !important;
   flex-shrink: 0 !important;
   display: inline-block !important;
@@ -184,6 +203,11 @@
 /* BannerMobile 内容区：避免被角落按钮遮挡（你可在移动端 wrapper 用这个 class） */
 .bannerMobileWrap {
   padding-top: 72px;
+  padding-left: 12px;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* =========================

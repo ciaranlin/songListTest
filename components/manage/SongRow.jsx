@@ -1,6 +1,6 @@
 import styles from "../../styles/Home.module.css";
 
-export default function SongRow({ song, onChange, onUpdate, onDelete }) {
+export default function SongRow({song, onChange, onUpdate, onDelete, languageOptions }) {
   // ⭐ 修复滑块跳回去的问题：只要非空就算开启
   const isCaptainSong =
     song.mood !== undefined &&
@@ -33,9 +33,9 @@ export default function SongRow({ song, onChange, onUpdate, onDelete }) {
           value={song.language}
           onChange={(e) => onChange(song.index, "language", e.target.value)}
         >
-          <option value="国语">国语</option>
-          <option value="日语">日语</option>
-          <option value="英语">英语</option>
+          {(Array.isArray(languageOptions) && languageOptions.length ? languageOptions : ["国语","日语","英语"]).map((v) => (
+            <option key={v} value={v}>{v}</option>
+          ))}
         </select>
       </td>
 

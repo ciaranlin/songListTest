@@ -8,6 +8,7 @@ import copy from "copy-to-clipboard";
 import styles from "../styles/Home.module.css";
 
 import Banner from "../components/banner/Banner.component";
+import BannerMobile from "../components/banner/BannerMobile.component";
 import SongDetail from "../components/SongDetail.component";
 import BiliPlayerModal from "../components/BiliPlayerModal.component";
 import SongListFilter from "../components/SongListFilter.component";
@@ -204,7 +205,12 @@ export default function Home() {
 
         <section className={styles.main}>
           <Row>
-            <Banner songCount={filteredSongList.length} config={siteConfig} />
+            <div className={styles.desktopOnly}>
+              <Banner songCount={filteredSongList.length} config={siteConfig} />
+            </div>
+            <div className={styles.mobileOnly}>
+              <BannerMobile config={siteConfig} />
+            </div>
           </Row>
 
           <Row>

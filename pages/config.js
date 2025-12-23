@@ -138,6 +138,8 @@ export default function ConfigPage() {
   const cornerActions = form?.CornerActions || [];
   const customButtons = form?.CustomButtons || [];
   const languageCategories = form?.LanguageCategories || [];
+  const bannerTitle = form?.BannerTitle || "";
+  const bannerContent = form?.BannerContent || [];
 
   // 帮你自动兜底：保证数组字段是数组
   useEffect(() => {
@@ -145,6 +147,7 @@ export default function ConfigPage() {
     patch((prev) => ({
       CornerActions: Array.isArray(prev?.CornerActions) ? prev.CornerActions : [],
       CustomButtons: Array.isArray(prev?.CustomButtons) ? prev.CustomButtons : [],
+      BannerContent: Array.isArray(prev?.BannerContent) ? prev.BannerContent : [],
       LanguageCategories: Array.isArray(prev?.LanguageCategories) ? prev.LanguageCategories : [],
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -413,6 +416,61 @@ export default function ConfigPage() {
             </div>
           ))}
         </section>
+
+
+{/* 碎碎念卡片：标题与文字（用于首页右侧卡片 & 移动端卡片） */}
+<section className={styles.section}>
+  <div className={styles.sectionHeader}>
+    <div>
+      <div className={styles.sectionTitle}>碎碎念卡片</div>
+      <div className={styles.sectionHint}>可配置标题与多行内容（每行一段）</div>
+    </div>
+  </div>
+
+  <Form.Group className="mb-3">
+    <Form.Label>碎碎念标题</Form.Label>
+    <Form.Control
+      value={bannerTitle}
+      placeholder="例如：日常碎碎念"
+      onChange={(e) => patch({ BannerTitle: e.target.value })}
+    />
+  </Form.Group>
+
+  <Form.Group className="mb-3">
+    <Form.Label>碎碎念内容（每行一段）</Form.Label>
+    <Form.Control
+      as="textarea"
+      rows={4}
+      value={(bannerContent || []).join("\n")}
+      placeholder={"例如：\n吃饱了躺一会很\n今天想唱点什么呢"}
+      onChange={(e) => {
+        const lines = String(e.target.value || "")
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        patch({ BannerContent: lines });
+      }}
+    />
+  </Form.Group>
+
+  <div className={styles.chipRow}>
+    {(bannerContent || []).map((t, idx) => (
+      <span className={styles.chip} key={t + idx}>
+        {t}
+        <button
+          className={styles.chipBtn}
+          onClick={() => {
+            const next = (bannerContent || []).filter((_, i) => i !== idx);
+            patch({ BannerContent: next });
+          }}
+          type="button"
+        >
+          ×
+        </button>
+      </span>
+    ))}
+  </div>
+</section>
 
         {/* 主页语言过滤器（点击添加） */}
         <section className={styles.section}>

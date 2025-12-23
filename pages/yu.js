@@ -2,19 +2,27 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Container, Table, Button } from "react-bootstrap";
+import { Container, Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 
-import manageStyles from "../styles/Manage.module.css";
-import homeStyles from "../styles/Home.module.css";
-
-import AddSongForm from "../components/manage/AddSongForm";
-import SongRow from "../components/manage/SongRow";
+import styles from "../styles/Manage.module.css";
 import { getMergedConfig, getMergedConfigClient } from "../lib/siteConfigStore";
 
 export default function SongManager() {
   const [songs, setSongs] = useState([]);
   const [siteConfig, setSiteConfig] = useState(getMergedConfig());
+
+  // 语言筛选（仅影响列表展示，不改变功能）
+  const [langFilter, setLangFilter] = useState("全部");
+
+  // 新增行
+  const [newSong, setNewSong] = useState({
+    song_name: "",
+    artist: "",
+    language: "国语",
+    BVID: "",
+    mood: "",
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -29,17 +37,29 @@ export default function SongManager() {
     };
   }, []);
 
-  const backgroundImageUrl = useMemo(() => {
-    return siteConfig?.BackgroundImage || "/assets/images/background.webp";
+  const languageOptions = useMemo(() => {
+    const cfg = Array.isArray(siteConfig?.LanguageCategories) ? siteConfig.LanguageCategories : [];
+    const base = ["国语"];
+    const merged = [...base, ...cfg].filter(Boolean);
+    // 去重
+    return Array.from(new Set(merged));
   }, [siteConfig]);
+
+  useEffect(() => {
+    // 配置变了，默认语言兜底
+    setNewSong((prev) => ({
+      ...prev,
+      language: prev.language || (languageOptions[0] || "国语"),
+    }));
+  }, [languageOptions]);
 
   const fetchSongs = useCallback(async () => {
     try {
       const res = await fetch("/api/getSongs");
       const data = await res.json();
       setSongs(data.songs || []);
-    } catch {
-      setSongs([]);
+    } catch (e) {
+      toast.error("获取歌单失败");
     }
   }, []);
 
@@ -48,7 +68,9 @@ export default function SongManager() {
   }, [fetchSongs]);
 
   const handleChange = useCallback((index, key, value) => {
-    setSongs((prev) => prev.map((song) => (song.index === index ? { ...song, [key]: value } : song)));
+    setSongs((prev) =>
+      prev.map((song) => (song.index === index ? { ...song, [key]: value } : song))
+    );
   }, []);
 
   const handleUpdate = useCallback(
@@ -81,7 +103,19 @@ export default function SongManager() {
   );
 
   const handleAdd = useCallback(
-    async (payload) => {
+    async () => {
+      const payload = {
+        song_name: (newSong.song_name || "").trim(),
+        artist: (newSong.artist || "").trim(),
+        language: (newSong.language || "").trim(),
+        BVID: (newSong.BVID || "").trim(),
+        mood: (newSong.mood || "").trim(),
+      };
+
+      if (!payload.song_name) return toast.info("请填写歌名");
+      if (!payload.artist) return toast.info("请填写歌手");
+      if (!payload.language) return toast.info("请选择语言");
+
       const res = await fetch("/api/addSong", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,31 +123,34 @@ export default function SongManager() {
       });
       const data = await res.json().catch(() => ({}));
       toast.success(data.message || "添加成功！");
+      setNewSong({
+        song_name: "",
+        artist: "",
+        language: languageOptions[0] || "国语",
+        BVID: "",
+        mood: "",
+      });
       fetchSongs();
     },
-    [fetchSongs]
+    [newSong, fetchSongs, languageOptions]
   );
 
+  const filteredSongs = useMemo(() => {
+    if (langFilter === "全部") return songs;
+    return songs.filter((s) => (s.language || "") === langFilter);
+  }, [songs, langFilter]);
+
   return (
-    <div
-      className={manageStyles.page}
-      style={{
-        background: "var(--yu-bg, #111827)",
-        color: "var(--yu-text, rgba(255,255,255,0.92))",
-        backgroundImage: `url(${backgroundImageUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <div className={styles.yuPage}>
       <Head>
         <title>歌单管理</title>
-        <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <Container className={manageStyles.container}>
-        <div className={manageStyles.title}>歌单管理</div>
+      <Container className={styles.container}>
+        <div className={styles.title}>歌单管理</div>
+        <div className={styles.yuHint}>增删改歌单数据（与首页实时同步）</div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+        <div className={styles.toolbar}>
           <Link
             href="/config"
             onClick={() => {
@@ -129,45 +166,222 @@ export default function SongManager() {
           <Link href="/" style={{ textDecoration: "none" }}>
             <Button variant="outline-light" size="sm">🏠 返回首页</Button>
           </Link>
+
+          <div style={{ flex: 1 }} />
+
+          <Form.Select
+            size="sm"
+            style={{ maxWidth: 220 }}
+            value={langFilter}
+            onChange={(e) => setLangFilter(e.target.value)}
+          >
+            <option value="全部">全部语言</option>
+            {languageOptions.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </Form.Select>
         </div>
 
-        <section className={manageStyles.section}>
-          <div className={manageStyles.sectionHeader}>
+        <div className={styles.kpiRow}>
+          <div className={styles.kpi}>总歌曲：{songs.length}</div>
+          <div className={styles.kpi}>当前显示：{filteredSongs.length}</div>
+          <div className={styles.kpi}>语言选项：{languageOptions.length}</div>
+        </div>
+
+        {/* 新增（卡片内一行表单，视觉与配置页一致） */}
+        <section className={styles.section} style={{ marginTop: 14 }}>
+          <div className={styles.sectionHeader}>
             <div>
-              <div className={manageStyles.sectionTitle}>歌曲编辑</div>
-              <div className={manageStyles.sectionHint}>增删改歌单数据（与首页实时同步）</div>
+              <div className={styles.sectionTitle}>新增歌曲</div>
+              <div className={styles.sectionHint}>填写后点击添加</div>
             </div>
           </div>
 
-          <div className={homeStyles.songListMarco} style={{ marginTop: 10 }}>
-            <AddSongForm onAdd={handleAdd} />
-            <Container fluid>
-              <Table responsive className={homeStyles.tableWrapper}>
+          <div className={styles.tableCard}>
+            <div className={styles.tableHead}>
+              <div className={styles.yuHint}>快速新增</div>
+            </div>
+
+            <div className={styles.tableBody}>
+              <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th style={{ width: "60px" }}>Index</th>
+                    <th style={{ width: 70 }}>Index</th>
                     <th>歌名</th>
                     <th>歌手</th>
-                    <th>语言</th>
-                    <th>BVID</th>
-                    <th style={{ textAlign: "center" }}>舰长点歌</th>
-                    <th style={{ width: "140px" }}>操作</th>
+                    <th style={{ width: 120 }}>语言</th>
+                    <th style={{ width: 170 }}>BVID</th>
+                    <th style={{ width: 140 }}>舰长点歌</th>
+                    <th style={{ width: 160, textAlign: "right" }}>操作</th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  {songs.map((song) => (
-                    <SongRow
-                      key={song.index}
-                      song={song}
-                      onChange={handleChange}
-                      onUpdate={handleUpdate}
-                      onDelete={handleDelete}
-                    />
+                  <tr className={styles.rowAlt}>
+                    <td style={{ color: "rgba(255,255,255,0.55)" }}>新增</td>
+
+                    <td>
+                      <input
+                        className={styles.inputLite}
+                        value={newSong.song_name}
+                        placeholder="歌名"
+                        onChange={(e) => setNewSong((p) => ({ ...p, song_name: e.target.value }))}
+                      />
+                    </td>
+
+                    <td>
+                      <input
+                        className={styles.inputLite}
+                        value={newSong.artist}
+                        placeholder="歌手"
+                        onChange={(e) => setNewSong((p) => ({ ...p, artist: e.target.value }))}
+                      />
+                    </td>
+
+                    <td>
+                      <select
+                        className={styles.inputLite}
+                        value={newSong.language}
+                        onChange={(e) => setNewSong((p) => ({ ...p, language: e.target.value }))}
+                      >
+                        {languageOptions.map((v) => (
+                          <option key={v} value={v}>{v}</option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      <input
+                        className={styles.inputLite}
+                        value={newSong.BVID}
+                        placeholder="BV..."
+                        onChange={(e) => setNewSong((p) => ({ ...p, BVID: e.target.value }))}
+                      />
+                    </td>
+
+                    <td>
+                      <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <input
+                          type="checkbox"
+                          checked={newSong.mood === "舰长点歌"}
+                          onChange={(e) =>
+                            setNewSong((p) => ({ ...p, mood: e.target.checked ? "舰长点歌" : "" }))
+                          }
+                        />
+                        <span className={styles.yuHint}>是</span>
+                      </label>
+                    </td>
+
+                    <td>
+                      <div className={styles.actionRow}>
+                        <Button size="sm" variant="success" onClick={handleAdd}>添加</Button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* 列表编辑 */}
+        <section className={styles.section} style={{ marginTop: 14 }}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <div className={styles.sectionTitle}>歌曲编辑</div>
+              <div className={styles.sectionHint}>直接编辑后点击“修改”，支持删除</div>
+            </div>
+          </div>
+
+          <div className={styles.tableCard}>
+            <div className={styles.tableHead}>
+              <div className={styles.yuHint}>按语言筛选仅影响展示，不会改数据</div>
+              <Button size="sm" variant="outline-light" onClick={fetchSongs}>
+                刷新
+              </Button>
+            </div>
+
+            <div className={styles.tableBody}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={{ width: 70 }}>Index</th>
+                    <th>歌名</th>
+                    <th>歌手</th>
+                    <th style={{ width: 120 }}>语言</th>
+                    <th style={{ width: 170 }}>BVID</th>
+                    <th style={{ width: 140 }}>舰长点歌</th>
+                    <th style={{ width: 160, textAlign: "right" }}>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSongs.map((song, i) => (
+                    <tr key={song.index} className={i % 2 === 1 ? styles.rowAlt : ""}>
+                      <td>{song.index}</td>
+
+                      <td>
+                        <input
+                          className={styles.inputLite}
+                          value={song.song_name}
+                          onChange={(e) => handleChange(song.index, "song_name", e.target.value)}
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          className={styles.inputLite}
+                          value={song.artist}
+                          onChange={(e) => handleChange(song.index, "artist", e.target.value)}
+                        />
+                      </td>
+
+                      <td>
+                        <select
+                          className={styles.inputLite}
+                          value={song.language}
+                          onChange={(e) => handleChange(song.index, "language", e.target.value)}
+                        >
+                          {languageOptions.map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      </td>
+
+                      <td>
+                        <input
+                          className={styles.inputLite}
+                          value={song.BVID || ""}
+                          onChange={(e) => handleChange(song.index, "BVID", e.target.value)}
+                        />
+                      </td>
+
+                      <td>
+                        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={song.mood === "舰长点歌"}
+                            onChange={(e) =>
+                              handleChange(song.index, "mood", e.target.checked ? "舰长点歌" : "")
+                            }
+                          />
+                          <span className={styles.yuHint}>是</span>
+                        </label>
+                      </td>
+
+                      <td>
+                        <div className={styles.actionRow}>
+                          <Button size="sm" variant="outline-light" onClick={() => handleUpdate(song)}>
+                            修改
+                          </Button>
+                          <Button size="sm" variant="outline-danger" onClick={() => handleDelete(song.index)}>
+                            删除
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
-              </Table>
-            </Container>
+              </table>
+            </div>
           </div>
         </section>
       </Container>
