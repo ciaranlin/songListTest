@@ -6,6 +6,7 @@ import { Container, Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 
 import styles from "../styles/Manage.module.css";
+import homeStyles from "../styles/Home.module.css"; // ✅ 复用主页同款 backToTop 样式
 import { getMergedConfig, getMergedConfigClient } from "../lib/siteConfigStore";
 
 export default function SongManager() {
@@ -24,6 +25,9 @@ export default function SongManager() {
     mood: "",
   });
 
+  // ✅ 返回顶部按钮显示控制（与主页行为一致）
+  const [showTop, setShowTop] = useState(false);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -38,7 +42,9 @@ export default function SongManager() {
   }, []);
 
   const languageOptions = useMemo(() => {
-    const cfg = Array.isArray(siteConfig?.LanguageCategories) ? siteConfig.LanguageCategories : [];
+    const cfg = Array.isArray(siteConfig?.LanguageCategories)
+      ? siteConfig.LanguageCategories
+      : [];
     const base = ["国语"];
     const merged = [...base, ...cfg].filter(Boolean);
     // 去重
@@ -69,7 +75,9 @@ export default function SongManager() {
 
   const handleChange = useCallback((index, key, value) => {
     setSongs((prev) =>
-      prev.map((song) => (song.index === index ? { ...song, [key]: value } : song))
+      prev.map((song) =>
+        song.index === index ? { ...song, [key]: value } : song
+      )
     );
   }, []);
 
@@ -140,6 +148,20 @@ export default function SongManager() {
     return songs.filter((s) => (s.language || "") === langFilter);
   }, [songs, langFilter]);
 
+  // ✅ 监听滚动：超过 300px 显示（与主页同逻辑）
+  useEffect(() => {
+    const onScroll = () => {
+      setShowTop(window.scrollY > 300);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const backToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className={styles.yuPage}>
       <Head>
@@ -160,24 +182,31 @@ export default function SongManager() {
             }}
             style={{ textDecoration: "none" }}
           >
-            <Button variant="outline-light" size="sm">⚙️ 配置</Button>
+            <Button variant="outline-light" size="sm">
+              ⚙️ 配置
+            </Button>
           </Link>
 
           <Link href="/" style={{ textDecoration: "none" }}>
-            <Button variant="outline-light" size="sm">🏠 返回首页</Button>
+            <Button variant="outline-light" size="sm">
+              🏠 返回首页
+            </Button>
           </Link>
 
           <div style={{ flex: 1 }} />
 
           <Form.Select
             size="sm"
+            className={styles.inputLite} // ✅ 让下拉也吃到你日间输入框样式
             style={{ maxWidth: 220 }}
             value={langFilter}
             onChange={(e) => setLangFilter(e.target.value)}
           >
             <option value="全部">全部语言</option>
             {languageOptions.map((v) => (
-              <option key={v} value={v}>{v}</option>
+              <option key={v} value={v}>
+                {v}
+              </option>
             ))}
           </Form.Select>
         </div>
@@ -224,7 +253,9 @@ export default function SongManager() {
                         className={styles.inputLite}
                         value={newSong.song_name}
                         placeholder="歌名"
-                        onChange={(e) => setNewSong((p) => ({ ...p, song_name: e.target.value }))}
+                        onChange={(e) =>
+                          setNewSong((p) => ({ ...p, song_name: e.target.value }))
+                        }
                       />
                     </td>
 
@@ -233,7 +264,9 @@ export default function SongManager() {
                         className={styles.inputLite}
                         value={newSong.artist}
                         placeholder="歌手"
-                        onChange={(e) => setNewSong((p) => ({ ...p, artist: e.target.value }))}
+                        onChange={(e) =>
+                          setNewSong((p) => ({ ...p, artist: e.target.value }))
+                        }
                       />
                     </td>
 
@@ -241,10 +274,14 @@ export default function SongManager() {
                       <select
                         className={styles.inputLite}
                         value={newSong.language}
-                        onChange={(e) => setNewSong((p) => ({ ...p, language: e.target.value }))}
+                        onChange={(e) =>
+                          setNewSong((p) => ({ ...p, language: e.target.value }))
+                        }
                       >
                         {languageOptions.map((v) => (
-                          <option key={v} value={v}>{v}</option>
+                          <option key={v} value={v}>
+                            {v}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -254,7 +291,9 @@ export default function SongManager() {
                         className={styles.inputLite}
                         value={newSong.BVID}
                         placeholder="BV..."
-                        onChange={(e) => setNewSong((p) => ({ ...p, BVID: e.target.value }))}
+                        onChange={(e) =>
+                          setNewSong((p) => ({ ...p, BVID: e.target.value }))
+                        }
                       />
                     </td>
 
@@ -264,7 +303,10 @@ export default function SongManager() {
                           type="checkbox"
                           checked={newSong.mood === "舰长点歌"}
                           onChange={(e) =>
-                            setNewSong((p) => ({ ...p, mood: e.target.checked ? "舰长点歌" : "" }))
+                            setNewSong((p) => ({
+                              ...p,
+                              mood: e.target.checked ? "舰长点歌" : "",
+                            }))
                           }
                         />
                         <span className={styles.yuHint}>是</span>
@@ -273,7 +315,9 @@ export default function SongManager() {
 
                     <td>
                       <div className={styles.actionRow}>
-                        <Button size="sm" variant="success" onClick={handleAdd}>添加</Button>
+                        <Button size="sm" variant="success" onClick={handleAdd}>
+                          添加
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -341,7 +385,9 @@ export default function SongManager() {
                           onChange={(e) => handleChange(song.index, "language", e.target.value)}
                         >
                           {languageOptions.map((v) => (
-                            <option key={v} value={v}>{v}</option>
+                            <option key={v} value={v}>
+                              {v}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -369,10 +415,18 @@ export default function SongManager() {
 
                       <td>
                         <div className={styles.actionRow}>
-                          <Button size="sm" variant="outline-light" onClick={() => handleUpdate(song)}>
+                          <Button
+                            size="sm"
+                            variant="outline-light"
+                            onClick={() => handleUpdate(song)}
+                          >
                             修改
                           </Button>
-                          <Button size="sm" variant="outline-danger" onClick={() => handleDelete(song.index)}>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => handleDelete(song.index)}
+                          >
                             删除
                           </Button>
                         </div>
@@ -385,6 +439,19 @@ export default function SongManager() {
           </div>
         </section>
       </Container>
+
+      {/* ✅ 返回顶部（与主页同一个样式 class：Home.module.css 里的 backToTop） */}
+      {showTop ? (
+        <button
+          type="button"
+          className={homeStyles.backToTop}
+          onClick={backToTop}
+          title="返回顶部"
+          aria-label="返回顶部"
+        >
+          ↑
+        </button>
+      ) : null}
     </div>
   );
 }
