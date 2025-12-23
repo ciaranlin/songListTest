@@ -440,18 +440,26 @@ export default function SongManager() {
         </section>
       </Container>
 
-      {/* ✅ 返回顶部（与主页同一个样式 class：Home.module.css 里的 backToTop） */}
+      
+      {/* ✅ 返回顶部（复用主页同款 styles.backToTopBtn） */}
       {showTop ? (
-        <button
-          type="button"
-          className={homeStyles.backToTop}
-          onClick={backToTop}
-          title="返回顶部"
-          aria-label="返回顶部"
-        >
-          ↑
+        <button onClick={backToTop} className={homeStyles.backToTopBtn}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="bi bi-chevron-up"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fillRule="evenodd"
+              d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
+            />
+          </svg>
         </button>
       ) : null}
+
     </div>
   );
 }
