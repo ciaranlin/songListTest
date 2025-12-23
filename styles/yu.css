@@ -1,0 +1,138 @@
+.admin-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #b8c8d3 0%, #dfe7ec 100%);
+  padding: 40px 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-container {
+  width: 95%;
+  max-width: 1200px;
+  background: #ffffffdd;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+}
+
+.admin-title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* 输入区域 */
+.input-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.input-box input,
+.input-box select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+.btn-add {
+  padding: 10px 20px;
+  background: #00b894;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-add:hover {
+  background: #019874;
+}
+
+/* 舰长点歌 toggle */
+.toggle {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.toggle input {
+  display: none;
+}
+.slider {
+  width: 36px;
+  height: 18px;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.3s;
+}
+.slider::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  transition: 0.3s;
+}
+.toggle input:checked + .slider {
+  background: #00b894;
+}
+.toggle input:checked + .slider::after {
+  transform: translateX(18px);
+}
+
+/* 表格 */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.song-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.song-table th {
+  background: #e3eaef;
+  padding: 12px;
+}
+
+.song-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.song-table input,
+.song-table select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-edit {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.btn-del {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
