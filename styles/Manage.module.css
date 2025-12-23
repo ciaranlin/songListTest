@@ -192,3 +192,26 @@
 @media (max-width: 1200px){
   .table{ min-width: 980px; }
 }
+
+
+/* 让 <select className={styles.inputLite}> 也好看 */
+.inputLite option {
+  color: #111827;
+}
+
+/* checkbox 也顺手日间化一点 */
+.yuPage input[type="checkbox"] {
+  accent-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+/* 表格里输入框别挤爆：长歌名/歌手也更舒服 */
+.table td input.inputLite,
+.table td select.inputLite {
+  min-width: 0;
+}
+
+/* 如果你现在 rowAlt 里把输入框变暗了，这条能“强制保持日间色” */
+.rowAlt .inputLite {
+  background: rgba(255, 255, 255, 0.82);
+}
