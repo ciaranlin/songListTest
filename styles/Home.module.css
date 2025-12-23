@@ -1,3 +1,7 @@
+/* =========================
+   基础布局
+   ========================= */
+
 .footer {
   display: flex;
   flex: 1;
@@ -19,18 +23,33 @@
   min-height: 86vh;
 }
 
+.outerContainer {
+  background-color: #dfd1e3;
+}
+
 .grandTitle {
   color: var(--main-text, #1d0c26);
 }
 
-.songListMarco {
-  background-color: rgba(255, 255, 255, 0.7);
-  border-radius: 1rem;
-  margin: 1rem 0 2rem;
-}
-
 .noWrapForce {
   white-space: nowrap !important;
+}
+
+/* =========================
+   Banner / 头像区域
+   ========================= */
+
+.titleCol {
+  position: relative; /* 关键：给右侧卡片做定位参考 */
+}
+
+.titleBox {
+  text-align: center;
+  transition: transform 1s ease-out;
+}
+
+.titleCol:hover .titleBox {
+  transform: translateX(-30%);
 }
 
 .avatar {
@@ -38,9 +57,106 @@
   border: 3px solid #bea5c1 !important;
 }
 
+/* =========================
+   右侧卡片容器（碎碎念 + GIF）
+   ========================= */
+
+.bannerRight {
+  position: absolute;
+  right: 4%;
+  top: 10%;
+  width: min(620px, 54%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s;
+}
+
+.titleCol:hover .bannerRight {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 两张卡片外层 */
+.introBox,
+.gifBox {
+  width: 100%;
+}
+
+/* 两张卡片的真正“卡片壳子” */
+.introBoxInnerDiv,
+.gifBoxInnerDiv {
+  background-color: rgba(255, 255, 255, 0.55);
+  border-radius: 1rem;
+  border: 2px solid #a083a0;
+  padding: 1rem;
+}
+
+/* 碎碎念标题 */
+.introTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--main-text, #1d0c26);
+}
+
+/* 碎碎念正文 */
+.introParagraph {
+  color: var(--main-text, #1d0c26);
+  margin-bottom: 0.5rem;
+}
+
+/* GIF 图片 */
+.bannerGif {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* =========================
+   移动端：隐藏右侧卡片
+   ========================= */
+
+@media (min-width: 1201px) {
+  .cornerTopLeft {
+    display: none !important;
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .bannerRight {
+    display: none;
+  }
+}
+
+
+
+/* 只隐藏“自我介绍”这个按钮（type=intro）——桌面端 */
+@media (min-width: 1201px) {
+  .introBtn {
+    display: none !important;
+  }
+}
+
+
+/* =========================
+   歌单 / 表格区域
+   ========================= */
+
+.songListMarco {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 1rem;
+  margin: 1rem 0 2rem;
+}
+
 .songRow {
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-  border-color:rgb(0 0 0 / 15%);
+  border-color: rgb(0 0 0 / 15%);
   transition: background-color 0.25s ease;
 }
 
@@ -51,14 +167,10 @@
 }
 
 .songRowTop {
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-  transition: background-color 0.25s ease;
   background-color: rgba(229, 106, 84, 0.1);
 }
 
 .songRowPaid {
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-  transition: background-color 0.25s ease;
   background-color: rgba(255, 223, 0, 0.1);
 }
 
@@ -67,7 +179,6 @@
   border: none;
   border-radius: 1rem;
   margin-top: 12px;
-  cursor: url("/assets/cursor/text.png"), text;
 }
 
 .filters:focus {
@@ -75,95 +186,40 @@
   box-shadow: none;
 }
 
-.customRandomButton {
-  color: var(--main-text, #1d0c26);
-  border-radius: 1rem;
-  border: none;
-  margin-top: 12px;
-  background-color: rgba(255, 255, 255, 0.5);
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
+/* =========================
+   分类 / 按钮
+   ========================= */
 
-.customRandomButton:focus,
-.customCategoryButton:focus,
-.mandarinBtn>button:focus {
-  color: var(--main-text, #1d0c26);
-  background-color: rgba(255, 255, 255, 0.5);
-  box-shadow: none;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
-
-.customRandomButton:hover,
-.customCategoryButton:hover,
-.mandarinBtn>button:hover {
-  color: var(--main-text, #1d0c26);
-  background-color: rgba(255, 255, 255, 1);
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
-
+.customRandomButton,
 .customCategoryButton,
-.mandarinBtn>button {
+.mandarinBtn > button {
   color: var(--main-text, #1d0c26);
   border-radius: 1rem;
-  margin-bottom: 12px;
   border: none;
   background-color: rgba(255, 255, 255, 0.5);
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
-
-.customCategoryButtonActive {
-  color: var(--main-text, #1d0c26);
-  border-radius: 1rem;
   margin-bottom: 12px;
-  border: none;
-  background-color: #bea5c1;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
 }
 
-.customCategoryButtonActive:focus {
-  color: var(--main-text, #1d0c26);
+.customCategoryButtonActive,
+.mandarinBtnActive > button {
   background-color: #bea5c1;
-  box-shadow: none;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
 }
 
-.customCategoryButtonActive:hover {
-  color: var(--main-text, #1d0c26);
+.customCategoryButtonActive:hover,
+.mandarinBtnActive > button:hover {
   background-color: #a083a0;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
 }
 
-.mandarinBtnActive>button {
-  color: var(--main-text, #1d0c26);
-  border-radius: 1rem;
-  margin-bottom: 12px;
-  border: none;
-  background-color: #bea5c1;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
-
-.mandarinBtnActive>button:focus,
-.mandarinBtnActive>button:hover {
-  color: var(--main-text, #1d0c26);
-  background-color: #a083a0;
-  box-shadow: none;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
-}
-
-.mandarinBtnActive>button:active {
-  color: var(--main-text, #1d0c26);
-  background-color: #bea5c1;
-  box-shadow: none;
-}
+/* =========================
+   回到顶部
+   ========================= */
 
 .backToTopBtn {
   position: fixed;
   bottom: 3rem;
   right: 2rem;
-  font-size: 16px;
   background-color: rgba(255, 255, 255, 0.5);
   color: var(--main-text, #1d0c26);
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
   border-radius: 0.5rem;
   padding: 0.75rem;
   border: none;
@@ -173,206 +229,129 @@
 
 .backToTopBtn:hover {
   background-color: white;
-  /* cursor: url("/assets/cursor/pointer.png"), pointer; */
 }
 
-.tableIconTd {
-  padding: 0.25rem !important;
-}
+/* =========================
+   CornerActions（角落快捷按钮）最终版
+   ========================= */
 
-.tableIcons {
+/* 单个角落按钮（外壳） */
+.cornerBtn {
+  position: absolute;
+  z-index: 10;
+
+  /* 垂直布局：图标在上，文字在下 */
   display: flex;
-  width: 27px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  /* 尺寸与手感（接近旧版） */
+  min-width: 68px;
+  padding: 10px 12px;
+
+  /* 视觉样式 */
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+
+  font-size: 13px;
+  line-height: 1.1;
+  text-align: center;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition: background 0.25s ease, transform 0.25s ease;
 }
 
-.biliIcon {
-  width: 20px;
-  vertical-align: text-bottom;
+.cornerBtn:hover {
+  background: rgba(0, 0, 0, 0.28);
+  transform: translateY(-1px);
 }
 
-.categorySelectionContainer {
-  border: 3px solid var(--main-text, #1d0c26);
-  border-radius: 1rem;
-  padding: 1rem;
+/* =========================
+   内部结构：图标 + 文案
+   ========================= */
+
+.cornerBtnInner {
+  display: flex;
+  flex-direction: column;   /* 图标在上 */
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
+
+/* 图标（重点：比之前大很多，接近旧版） */
+.cornerBtnIcon {
+  width: 36px;              /* ⭐ 可调：36 / 40 都可以 */
+  height: 36px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* =========================
+   四角定位
+   ========================= */
+
+.cornerTopLeft {
+  top: 12px;
+  left: 12px;
+}
+
+.cornerTopRight {
+  top: 12px;
+  right: 12px;
+}
+
+.cornerBottomLeft {
+  bottom: 12px;
+  left: 12px;
+}
+
+.cornerBottomRight {
+  bottom: 12px;
+  right: 12px;
+}
+
+/* =========================
+   桌面端：隐藏“自我介绍”(type=intro)
+   ========================= */
 
 @media (min-width: 1201px) {
-  .outerContainer {
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
--webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-  }
-
-  .categorySelectionTitle {
-    margin: auto;
-    text-align: center;
-    width: 215px;
-    margin-bottom: 1rem;
-  }
-
-  .introBox {
-    position: relative;
-    left: 40%;
-    top: -95%;
-    width: 55%;
-    opacity: 0;
-    transition: opacity 1s;
-  }
-
-  .introBoxInnerDiv {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem;
-    border: 2px solid #a083a0;
-    padding: 1rem;
-  }
-
-  .titleCol:hover .introBox {
-    opacity: 1;
-  }
-
-  /* GIF 卡片：与 introBox 同级定位，但更靠下，形成第二张卡片 */
-  .gifBox {
-    position: relative;
-    left: 40%;
-    top: -78%;          /* 这一行决定“第二张卡片”和第一张的距离 */
-    width: 55%;
-    opacity: 0;
-    transition: opacity 1s;
-  }
-
-  .gifBoxInnerDiv {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem;
-    border: 2px solid #a083a0;
-    padding: 0.75rem;
-  }
-
-  .titleCol:hover .gifBox {
-    opacity: 1;
-  }
-
-  .bannerGif {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 0.75rem;
-  }
-
-  .titleCol:hover .titleBox {
-    position: relative;
-    transform: translateX(-30%);
-  }
-
-  .biliPlayerDiv {
-    width: 100%;
-    height: 75vh;
+  .introBtn {
+    display: none !important;
   }
 }
 
-@media (max-width: 1200px) {
-  .outerContainer {
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
--webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+/* =========================
+   移动端：可选缩小按钮
+   ========================= */
+
+@media (max-width: 768px) {
+  .cornerBtn {
+    min-width: 56px;
+    padding: 8px 10px;
+    font-size: 12px;
   }
 
-  /* .categorySelectionTitle {
-    position: relative;
-    top: -2rem;
-    background-color: #dfd1e3;
-    margin: auto;
-    text-align: center;
-    width: 215px;
-    height: 16px;
-  } */
-
-  .categorySelectionTitle {
-    margin: auto;
-    text-align: center;
-    width: 215px;
-    height: 16px;
-    margin-bottom: 1rem;
-  }
-
-  .introBox {
-    display: none;
-  }
-
-  .biliPlayerDiv {
-    width: 100%;
-    height: 100%;
+  .cornerBtnIcon {
+    width: 28px;
+    height: 28px;
   }
 }
 
-.outerContainer {
-  background-color: #dfd1e3;
+/* =========================
+   后台管理（保持原样）
+   ========================= */
+
+.manageContainer {
+  margin: 80px auto;
+  padding-top: 50px;
 }
 
-.titleBox {
-  text-align: center;
-  transition: transform 1s ease-out;
-}
-
-.introTitle {
-  display: flex;
-  justify-content: space-between;
-  color: var(--main-text, #1d0c26);
-}
-
-.introParagraph {
-  color: var(--main-text, #1d0c26);
-}
-
-
-
-
-/* 后台表格外框，与前台歌单保持统一 */
-.manageTable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 8px;
-}
-
-/* 表头，和前台样式一致 */
-.manageTable th {
-  padding: 10px;
-  background: #e8eff4;
-  border-radius: 8px;
-  text-align: left;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 行背景 */
-.manageTable td {
-  background: #f9fbfc;
-  padding: 8px;
-  border-radius: 8px;
-}
-
-/* 后台输入框 */
-.manageInput {
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 6px;
-}
-
-/* 右侧按钮不换行 */
-.manageActionCell {
-  white-space: nowrap;
-}
-/* 后台整体容器 */
 .manageCard {
   width: 90%;
   max-width: 1200px;
@@ -383,383 +362,24 @@
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-/* 后台标题 */
 .manageTitle {
   text-align: center;
   font-size: 26px;
   margin-bottom: 20px;
-  color: #2d3e50;
   font-weight: bold;
 }
 
-/* 整页居中，背景与前台保持一致 */
-.pageContainer {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  padding-top: 30px;
-  background: var(--bgColor, #b9c7cf);  /* 和你前台背景一致 */
-}
-
-/* 卡片（白底、圆角、阴影，与首页歌单一致） */
-.manageCard {
-  width: 95%;
-  max-width: 1200px;
-  background: #ffffff;
-  padding: 30px 40px;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* 标题美化 */
-.manageTitle {
-  text-align: center;
-  font-size: 26px;
-  margin-bottom: 20px;
-  color: #2d3e50;
-  font-weight: bold;
-}
-
-/* 表格整体控制（让后台表格对齐前台） */
 .manageTable {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+  border-collapse: separate;
+  border-spacing: 0 8px;
 }
 
 .manageTable th {
   background: #f5f5f5;
   padding: 10px;
-  text-align: left;
-  font-weight: bold;
 }
 
 .manageTable td {
   padding: 10px;
-  vertical-align: middle;
-}
-
-/* input 样式复用前台输入框 */
-.input {
-  width: 100%;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-}
-
-/* 小按钮（复用前台蓝色/红色） */
-.btnBlueSmall {
-  padding: 5px 12px;
-  background: #3b82f6;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-}
-
-.btnRedSmall {
-  padding: 5px 12px;
-  background: #e53935;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-}
-
-.pageContainer {
-  display: flex;
-  justify-content: center;
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-
-.manageCard {
-  background: white;
-  width: 90%;
-  max-width: 1100px;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-.manageTitle {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.manageTable {
-  width: 100%;
-  margin-top: 20px;
-}
-
-.manageTable table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.addSongRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.addSongRow input,
-.addSongRow select {
-  flex: 1;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 22px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .3s;
-  border-radius: 22px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4CAF50;
-}
-
-input:checked + .slider:before {
-  transform: translateX(18px);
-}
-
-/* 整个后台标题 */
-.manageTitle {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-/* 添加歌曲一整行：所有控件在一行，最后是“添加”按钮 */
-.addSongRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-/* 添加行里的输入占同等空间 */
-.addSongRow input,
-.addSongRow select {
-  flex: 1;
-}
-
-/* “舰长点歌 + 开关” 小区域 */
-.addMoodWrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 110px; /* 防止折行 */
-}
-
-.moodLabel {
-  font-size: 12px;
-  color: #666;
-}
-
-/* 表格外层容器（和前台复用） */
-.songListMarco {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-/* 表格宽度 100% 填满卡片 */
-.manageTable {
-  width: 100%;
-}
-
-.manageTable table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* 按钮所在单元格：让内容垂直居中 */
-.actionCell {
-  vertical-align: middle !important;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-/* 按钮容器：让两个按钮在一行上并排且垂直居中 */
-.actionButtons {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* 小按钮高度强制与 input 一致 */
-.btnBlueSmall,
-.btnRedSmall {
-  height: 34px !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  font-size: 14px;
-}
-
-/* 动作按钮单元格，让内容垂直居中 */
-.actionCell {
-  vertical-align: middle !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  white-space: nowrap; /* 防止按钮换行 */
-}
-
-/* 按钮容器(修改 + 删除)，保证横向排列 */
-.actionButtons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px; /* 按钮间距 */
-  white-space: nowrap;
-}
-
-/* 修复按钮高度，让其与 input 一致 */
-.btnBlueSmall,
-.btnRedSmall {
-  height: 34px !important;
-  line-height: 34px !important;
-  padding: 0 14px !important;
-  font-size: 14px !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.switchWrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.switchInput {
-  position: relative;
-  width: 44px;
-  height: 22px;
-  appearance: none;
-  background: #d1d1d1;
-  border-radius: 22px;
-  cursor: pointer;
-  transition: background 0.25s;
-}
-
-.switchInput:checked {
-  background: #4caf50;
-}
-
-.switchInput::before {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.25s;
-}
-
-.switchInput:checked::before {
-  transform: translateX(22px);
-}
-
-.manageContainer {
-  margin: 80px auto;
-  padding-top: 50px;
-}
-
-
-/* ===== 角落快捷按钮 ===== */
-.cornerBtn {
-  position: absolute;
-  z-index: 10;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.18);
-  color: rgba(255,255,255,0.92);
-  text-decoration: none;
-  font-size: 13px;
-  backdrop-filter: blur(10px);
-}
-
-.cornerBtn:hover {
-  background: rgba(0,0,0,0.28);
-  color: rgba(255,255,255,1);
-}
-
-.cornerBtnInner {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cornerBtnIcon {
-  width: 18px;
-  height: 18px;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
-.cornerTopLeft { top: 12px; left: 12px; }
-.cornerTopRight { top: 12px; right: 12px; }
-.cornerBottomLeft { bottom: 12px; left: 12px; }
-.cornerBottomRight { bottom: 12px; right: 12px; }
-
-/* GIF：隐藏在头图下方 */
-.bannerGif {
-  margin-top: 10px;
-  width: 160px;
-  max-width: 60vw;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-/* 主题：背景覆盖 */
-.mainBg {
-  background: var(--main-bg, #0f172a);
-  min-height: 100vh;
 }

@@ -60,10 +60,11 @@ export default function Banner({ songCount, config }) {
 
   return (
     <Col className={styles.titleCol}>
-      {/* 顶部头像标题区 */}
-      <div className={"pt-3 " + styles.titleBox}>
-        <CornerActions config={config} />
+      {/* 角落按钮：必须放在 titleBox 外面，否则会跟着 titleBox 一起移动 */}
+      <CornerActions config={config} />
 
+      {/* 顶部头像标题区（hover 会左移的只有这一块） */}
+      <div className={"pt-3 " + styles.titleBox}>
         <Image
           loader={imageLoader}
           className={styles.avatar}
@@ -81,57 +82,59 @@ export default function Banner({ songCount, config }) {
           和她拿手的<b>{songCount}</b>首歌
         </h1>
 
-        <p className="text-center py-3 mb-xl-5 text-muted">可以点击歌名复制哦</p>
+        <p className="text-center py-3 mb-xl-5 text-muted">
+          可以点击歌名复制哦
+        </p>
       </div>
 
-      {/* 卡片1：碎碎念 */}
-      <div className={styles.introBox}>
-        <div className={styles.introBoxInnerDiv}>
-          <div className={styles.introTitle}>
-            <h5>{config?.BannerTitle}</h5>
+      {/* 右侧卡片容器（碎碎念 + GIF） */}
+      <div className={styles.bannerRight}>
+        {/* 卡片1：碎碎念 */}
+        <div className={styles.introBox}>
+          <div className={styles.introBoxInnerDiv}>
+            <div className={styles.introTitle}>
+              <h5>{config?.BannerTitle}</h5>
 
-            {/* 网易云 & QQ音乐按钮 */}
-            <div className="d-flex">
-              {netEaseMusicComponent(config?.NetEaseMusicId)}
-              {qqMusicComponent(config?.QQMusicId)}
+              <div className="d-flex">
+                {netEaseMusicComponent(config?.NetEaseMusicId)}
+                {qqMusicComponent(config?.QQMusicId)}
+              </div>
+            </div>
+
+            {(config?.BannerContent || []).map((cnt) => (
+              <p className={styles.introParagraph} key={cnt}>
+                {cnt}
+              </p>
+            ))}
+
+            <div className="d-flex flex-nowrap justify-content-evenly">
+              {(config?.CustomButtons || []).map((btn) => (
+                <BannerButton
+                  key={btn.link}
+                  link={btn.link}
+                  image={btn.image}
+                  name={btn.name}
+                  style={{ marginTop: 0, border: "2px solid #DFD1E3" }}
+                />
+              ))}
             </div>
           </div>
+        </div>
 
-          {/* 首页文本 */}
-          {(config?.BannerContent || []).map((cnt) => (
-            <p className={styles.introParagraph} key={cnt}>
-              {cnt}
-            </p>
-          ))}
-
-          {/* 自定义按钮 */}
-          <div className="d-flex flex-nowrap justify-content-evenly">
-            {(config?.CustomButtons || []).map((btn) => (
-              <BannerButton
-                key={btn.link}
-                link={btn.link}
-                image={btn.image}
-                name={btn.name}
-                style={{ marginTop: 0, border: "2px solid #DFD1E3" }}
+        {/* 卡片2：GIF（独立一张） */}
+        {gifImg ? (
+          <div className={styles.gifBox}>
+            <div className={styles.gifBoxInnerDiv}>
+              <img
+                src={gifImg}
+                alt="装饰GIF"
+                className={styles.bannerGif}
+                loading="lazy"
               />
-            ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
-
-      {/* 卡片2：GIF（独立卡片，不和上面连着） */}
-      {gifImg ? (
-        <div className={styles.gifBox}>
-          <div className={styles.gifBoxInnerDiv}>
-            <img
-              src={gifImg}
-              alt="装饰GIF"
-              className={styles.bannerGif}
-              loading="lazy"
-            />
-          </div>
-        </div>
-      ) : null}
     </Col>
   );
 }
