@@ -395,3 +395,8 @@
 .bannerMobileWrap {
   padding-top: 72px;
 }
+
+.introBoxInnerDiv {
+  max-width: 420px;
+  margin: 0 auto;
+}
